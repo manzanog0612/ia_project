@@ -43,12 +43,12 @@ namespace IA.FSM
         {
             if (relations[currentStateIndex, flag] != -1)
             {
-                foreach (Action OnExit in states[currentStateIndex].GetOnExitBehaviours())
+                foreach (Action OnExit in states[currentStateIndex].GetOnExitBehaviours(statesOnExitParameters[currentStateIndex]?.Invoke()))
                     OnExit?.Invoke();
 
                 currentStateIndex = relations[currentStateIndex, flag];
 
-                foreach (Action OnEnter in states[currentStateIndex].GetOnEnterBehaviours())
+                foreach (Action OnEnter in states[currentStateIndex].GetOnEnterBehaviours(statesOnEnterParameters[currentStateIndex]?.Invoke()))
                     OnEnter?.Invoke();
             }
         }
@@ -67,11 +67,11 @@ namespace IA.FSM
             }
         }
 
-        public void Update(params object[] parameters)
+        public void Update()
         {
             if (states.ContainsKey(currentStateIndex))
             {
-                foreach (Action behaviour in states[currentStateIndex].GetBehaviours(parameters))
+                foreach (Action behaviour in states[currentStateIndex].GetBehaviours(statesParameters[currentStateIndex].Invoke()))
                 {
                     behaviour?.Invoke();
                 }
