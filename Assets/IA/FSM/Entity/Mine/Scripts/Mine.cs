@@ -1,11 +1,14 @@
 using UnityEngine;
 
+using IA.Common.Entity.SelectableObject;
+
 using TMPro;
 
 namespace IA.FSM.Entity.Mine
 {
-    public class Mine : MonoBehaviour
+    public class Mine : SelectableObject
     {
+        [Header("Mine")]
         [SerializeField] private TextMeshProUGUI txtMineralsAmount = null;
 
         private int minerals = 0;

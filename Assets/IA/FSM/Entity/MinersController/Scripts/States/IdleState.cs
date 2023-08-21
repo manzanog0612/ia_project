@@ -3,26 +3,34 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using IA.FSM.Entity.Miner.Enums;
+using IA.FSM.Entity.MinersController.Enums;
 
-namespace IA.FSM.Entity.Miner.States
+namespace IA.FSM.Entity.MinersController.States
 {
     public class IdleState : State
     {
         public override List<Action> GetBehaviours(params object[] parameters)
         {
-            bool setNewMine = (bool)parameters[0];
+            LayerMask layerMask = (LayerMask)parameters[0];
 
             List<Action> behaviours = new List<Action>();
 
             behaviours.Add(() =>
             {
-                if (setNewMine)
+                if (Input.GetMouseButtonDown(0))
                 {
-                    Transition((int)Flags.OnSetMine);
+                    RaycastHit hit;
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                    if (Physics.Raycast(ray, out hit))
+                    {
+                        if (layerMask == (layerMask | (1 << hit.collider.gameObject.layer)))
+                        {
+                            Transition((int)Flags.OnSelectObject);
+                        }
+                    }
                 }
             });
-            behaviours.Add(() => Debug.Log("IDLE"));
 
             return behaviours;
         }
@@ -37,11 +45,6 @@ namespace IA.FSM.Entity.Miner.States
         public override List<Action> GetOnExitBehaviours(params object[] parameters)
         {
             List<Action> exitBehaviours = new List<Action>();
-
-            exitBehaviours.Add(() => 
-            {
-                (parameters[0] as Action).Invoke();
-            });
 
             return exitBehaviours;
         }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace IA.FSM.Entity.Miner.Enum
+using IA.FSM.Entity.Miner.Enums;
+
+namespace IA.FSM.Entity.Miner.States
 {
     public class GoingToMineState : State
     {
