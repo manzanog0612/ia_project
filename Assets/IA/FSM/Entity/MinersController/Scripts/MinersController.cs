@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -17,7 +19,11 @@ namespace IA.FSM.Entity.MinersController
         private List<Miner.Miner> selectedMiners = new List<Miner.Miner>();
         private List<Mine.Mine> selectedMines = new List<Mine.Mine>();
 
+        private ConcurrentBag<Miner.Miner> miners = new ConcurrentBag<Miner.Miner>();
+
         private FSM fsm;
+
+        private Dictionary<int, Vector3> minersPositions = new Dictionary<int, Vector3>();
 
         private void Start()
         {
@@ -41,10 +47,23 @@ namespace IA.FSM.Entity.MinersController
                 () => (new object[2] { selectedMiners, selectedMines }));
 
             fsm.SetCurrentStateForced((int)Enums.States.Idle);
+
+            Miner.Miner[] minersArray = FindObjectsOfType<Miner.Miner>();
+
+            for (int i = 0; i < minersArray.Length; i++)
+            {
+                miners.Add(minersArray[i]);
+            }
         }
 
         private void Update()
         {
+            Parallel.ForEach(miners,
+                miner =>
+                {
+                    miner.MinerBehaviour.UpdateFsm();
+                });
+
             fsm.Update();
         }
 

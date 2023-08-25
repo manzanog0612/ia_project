@@ -19,6 +19,7 @@ namespace IA.FSM.Entity.Miner.States
             Mine.Mine targetMine = parameters[0] as Mine.Mine;
             int inventory = (int)parameters[1];
             Action onMine = parameters[2] as Action;
+            float deltaTime = (float)parameters[3];
 
             List<Action> behaviours = new List<Action>();
 
@@ -35,7 +36,7 @@ namespace IA.FSM.Entity.Miner.States
                 }
                 else                
                 {
-                    miningTimer += Time.deltaTime;
+                    miningTimer += deltaTime;
 
                     if (miningTimer > miningTime)
                     {

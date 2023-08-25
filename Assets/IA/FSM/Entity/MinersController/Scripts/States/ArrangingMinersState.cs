@@ -20,21 +20,21 @@ namespace IA.FSM.Entity.MinersController.States
                 {
                     if (miners.Count > i)
                     {
-                        miners[i].SetMine(mines[i]);
+                        miners[i].MinerBehaviour.SetMine(mines[i]);
                     }
                 }
 
-                if (mines.Count < miners.Count)
+                if (mines.Count < miners.Count && mines.Count > 0)
                 {
                     int minesIndex = 0;
                     for (int i = mines.Count; i < miners.Count; i++)
                     {
-                        if (minesIndex > mines.Count)
+                        if (minesIndex == mines.Count)
                         {
                             minesIndex = 0;
                         }
 
-                        miners[i].SetMine(mines[minesIndex]);
+                        miners[i].MinerBehaviour.SetMine(mines[minesIndex]);
 
                         minesIndex++;
                     }

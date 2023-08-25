@@ -10,10 +10,21 @@ namespace IA.Background.Entity.Home
 
         private int minerals = 0;
 
+        public Vector3 Position { get; private set; }
+
+        private void Start()
+        {
+            Position = transform.position;
+        }
+
         public void PlaceMinerals(int minerals)
         {
             this.minerals += minerals;
-            txtMineralsAmount.text = this.minerals.ToString();
+        }
+
+        private void Update()
+        {
+            txtMineralsAmount.text = this.minerals.ToString();            
         }
     }
 }

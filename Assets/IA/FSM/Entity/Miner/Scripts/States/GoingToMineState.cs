@@ -11,17 +11,20 @@ namespace IA.FSM.Entity.Miner.States
     {
         public override List<Action> GetBehaviours(params object[] parameters)
         {
-            Transform transform = parameters[0] as Transform;
-            Transform mine = parameters[1] as Transform;
-            float speed = (float)parameters[2];
+            Action<Vector3> onSetPosition = parameters[0] as Action<Vector3>;
+            Vector3 position = (Vector3)parameters[1];
+            Vector3 minePosition = (Vector3)parameters[2];
+            float speed = (float)parameters[3];
+            float deltaTime = (float)parameters[4];
 
             List<Action> behaviours = new List<Action>();
 
             behaviours.Add(() =>
             {
-                transform.position += (mine.position - transform.position).normalized * speed * Time.deltaTime;
+                Vector3 newPos = position + ((minePosition - position).normalized * speed * deltaTime);
+                onSetPosition.Invoke(newPos);
 
-                if (Vector3.Distance(transform.position, mine.position) < 0.1f)
+                if (Vector3.Distance(newPos, minePosition) < 0.1f)
                 {
                     Transition((int)Flags.OnReachMine);
                 }

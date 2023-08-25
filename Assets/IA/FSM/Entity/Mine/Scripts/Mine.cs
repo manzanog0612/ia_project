@@ -14,16 +14,22 @@ namespace IA.FSM.Entity.Mine
         private int minerals = 0;
         
         public int Minerals { get => minerals; }
+        public Vector3 Position { get; private set; }
 
         private void Start()
         {
+            Position = transform.position;
             minerals = Random.Range(10, 20);
-            txtMineralsAmount.text = minerals.ToString();
+            //txtMineralsAmount.text = minerals.ToString();
         }
 
         public void Extract()
         {
             minerals--;
+        }
+
+        private void Update()
+        {
             txtMineralsAmount.text = minerals.ToString();
         }
     }
