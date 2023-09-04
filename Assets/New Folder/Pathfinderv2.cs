@@ -12,6 +12,8 @@ public class Pathfinderv2 : MonoBehaviour
     private Tile objetiveTile = null;
     private Tile actualTile = null;
 
+    private int actualWeight = 0;
+
     private Stack<Tile> walkedTiles = new Stack<Tile>();
     private List<Tile> openedTiles = new List<Tile>();
     private List<Tile> blockedTiles = new List<Tile>();
@@ -51,19 +53,21 @@ public class Pathfinderv2 : MonoBehaviour
 
         while (actualTile.position != objetive)
         {
-            Tile nextTile = GetOpenedMinorDist();
+            Tile nextTile = GetOpenedMinorDistAndWeight();
             Tile fromTile = actualTile;
 
-            if (!actualTile.neighbors.Contains(nextTile))
+            if (!actualTile.neighbours.Contains(nextTile))
             {
                 Tile walkedTile = actualTile;
 
-                while (walkedTile != null && !walkedTile.neighbors.Contains(nextTile))
+                while (walkedTile != null && !walkedTile.neighbours.Contains(nextTile))
                 {
                     BlockTile(walkedTile);
                     walkedTiles.Pop();
                     walkedTile = walkedTile.fromTile;
                 }
+
+                fromTile = walkedTile;
 
                 UpdateOpenedTilesStatus();
             }
@@ -100,12 +104,13 @@ public class Pathfinderv2 : MonoBehaviour
 
         return path;
     }
-
+    
     private void MoveToTile(Tile tile, Tile fromTile = null)
     {
         tile.fromTile = fromTile;
         actualTile = tile;
         OpenNeighborTiles();
+        actualWeight += actualTile.weight;
 
         walkedTiles.Push(actualTile);
         openedTiles.Remove(tile);
@@ -113,9 +118,9 @@ public class Pathfinderv2 : MonoBehaviour
 
     private void OpenNeighborTiles()
     {
-        for (int i = 0; i < actualTile.neighbors.Count; i++)
+        for (int i = 0; i < actualTile.neighbours.Count; i++)
         {
-            Tile neighborTile = actualTile.neighbors[i];
+            Tile neighborTile = actualTile.neighbours[i];
 
             if (CanTileBeOpened(neighborTile))
             {
@@ -124,9 +129,9 @@ public class Pathfinderv2 : MonoBehaviour
         }
     }
 
-    private Tile GetOpenedMinorDist()
+    private Tile GetOpenedMinorDistAndWeight()
     {
-        Tile minorDistTile = null;
+        List<Tile> minorDistTiles = new List<Tile>();
         int tileMinorDist = int.MaxValue;
 
         for (int i = 0; i < openedTiles.Count; i++)
@@ -136,7 +141,23 @@ public class Pathfinderv2 : MonoBehaviour
             if (tileDist < tileMinorDist)
             {
                 tileMinorDist = tileDist;
-                minorDistTile = openedTiles[i];
+                minorDistTiles.Add(openedTiles[i]);
+            }
+        }
+
+        minorDistTiles.Reverse();
+
+        Tile minorDistTile = null;
+        int totalWeight = int.MaxValue;
+
+        for (int i = 0; i < minorDistTiles.Count; i++)
+        {
+            int actualTileWeight = actualWeight + minorDistTiles[i].weight;
+
+            if (actualTileWeight < totalWeight)
+            {
+                minorDistTile = minorDistTiles[i];
+                totalWeight = actualTileWeight;
             }
         }
 
@@ -162,6 +183,8 @@ public class Pathfinderv2 : MonoBehaviour
             openedTiles.Remove(tile);
         }
 
+        actualWeight -= tile.weight;
+
         grid.SetBlocked(tile);
     }
 
@@ -184,7 +207,7 @@ public class Pathfinderv2 : MonoBehaviour
                     Tile tile = walkedTiles.Pop();
                     auxStack.Push(tile);
 
-                    if (tile.neighbors.Contains(openedTiles[i]))
+                    if (tile.neighbours.Contains(openedTiles[i]))
                     {
                         found = true;
                         break;
@@ -212,7 +235,7 @@ public class Pathfinderv2 : MonoBehaviour
 
         while (previousTile != null)
         {
-            if (previousTile.neighbors.Contains(nextTile))
+            if (previousTile.neighbours.Contains(nextTile))
             {
                 tileWhomWasTheNeighborBefore = previousTile;
             }
@@ -220,6 +243,42 @@ public class Pathfinderv2 : MonoBehaviour
             previousTile = previousTile.fromTile;
         }
 
-        return tileWhomWasTheNeighborBefore;
+        if (tileWhomWasTheNeighborBefore == null)
+        {
+            return null;
+        }
+
+        Stack<Tile> auxStack = new Stack<Tile>();
+
+        int totalWeigthForNewPath = 0;
+
+        for (int i = walkedTiles.Count - 1; i >= 0; i--)
+        {
+            Tile walkedTile = walkedTiles.Pop();
+            auxStack.Push(walkedTile);
+
+            if (walkedTile == tileWhomWasTheNeighborBefore)
+            {
+                while (walkedTiles.Count > 0)
+                {
+                    Tile tile = walkedTiles.Pop();
+                    auxStack.Push(tile);
+
+                    totalWeigthForNewPath += tile.weight;
+                }
+
+                totalWeigthForNewPath += nextTile.weight;
+                break;
+            }
+        }
+
+        for (int j = auxStack.Count - 1; j >= 0; j--)
+        {
+            walkedTiles.Push(auxStack.Pop());
+        }
+
+        return totalWeigthForNewPath < actualWeight + nextTile.weight ? tileWhomWasTheNeighborBefore : null;
     }
+
+
 }

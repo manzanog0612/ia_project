@@ -11,6 +11,7 @@ public class Grid : MonoBehaviour
     [SerializeField] private Material notWalkableMat = null;
     [SerializeField] private Material blockedMat = null;
     [SerializeField] private Material walkedMat = null;
+    [SerializeField] private Material gridMat = null;
 
     private List<Tile> gridTiles = new List<Tile>();
 
@@ -32,6 +33,24 @@ public class Grid : MonoBehaviour
                 else
                 {
                     tile.walkable = true;
+
+                    if ((i == 3 || i == 2) && (j != 7 && j > 3))
+                    {
+                        tile.weight = 2;
+                    }
+                    else if (i == 1 && j == 7)
+                    {
+                        tile.weight = 30;
+                    }
+                    else
+                    {
+                        tile.weight = 1;
+                    }
+
+                    Material material = new Material(gridMat);
+                    material.color *= new Color(material.color.r - 0.2f * tile.weight, material.color.g, material.color.b);
+
+                    tile.meshRenderer.material = material;
                 }
 
                 gridTiles.Add(tile);
@@ -40,7 +59,7 @@ public class Grid : MonoBehaviour
 
         for (int i = 0; i < gridTiles.Count; i++)
         {
-            gridTiles[i].neighbors = FindNeighbours(gridTiles[i].position);
+            gridTiles[i].neighbours = FindNeighbours(gridTiles[i].position);
         }
     }
 
@@ -72,5 +91,20 @@ public class Grid : MonoBehaviour
     public void SetWalked(Tile tile)
     {
         tile.meshRenderer.material = walkedMat;
+    }
+
+    public void ConfigureGHCosts(Tile start, Tile objective)
+    {
+        int Dist(Tile t1, Tile t2)
+        {
+            return Mathf.Abs(t1.position.x - t2.position.x) + Mathf.Abs(t1.position.y - t2.position.y);
+        }
+
+        for (int i = 0; i < gridTiles.Count; i++)
+        {
+            Tile tile = gridTiles[i];
+            tile.gCost = Dist(start, tile);
+            tile.hCost = Dist(objective, tile);
+        }
     }
 }

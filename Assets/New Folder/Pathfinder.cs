@@ -43,9 +43,9 @@ public class Pathfinder : MonoBehaviour
 
             int minorDistNeighbour = 9999;
 
-            for (int i = 0; i < actualTile.neighbors.Count; i++)
+            for (int i = 0; i < actualTile.neighbours.Count; i++)
             {
-                neighbourTile = actualTile.neighbors[i];
+                neighbourTile = actualTile.neighbours[i];
                 int tileDist = Dist(objetiveTile, neighbourTile);
 
                 if (CanTileBeOpened(neighbourTile))
@@ -76,7 +76,7 @@ public class Pathfinder : MonoBehaviour
                 for (int i = walkedTiles.Count - 1; i >= 0; i--)
                 {
                     List<Tile> tiles = new List<Tile>();
-                    tiles.AddRange(walkedTiles[i].neighbors.FindAll(t => !walkedTiles.Contains(t)));
+                    tiles.AddRange(walkedTiles[i].neighbours.FindAll(t => !walkedTiles.Contains(t)));
                     tiles.Add(walkedTiles[i]);
 
                     Tile closerWalkedTile = tiles.Find(t => Dist(objetiveTile, neighbourTile) <= minorDistNeighbour);
