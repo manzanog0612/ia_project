@@ -10,17 +10,23 @@ namespace IA.FSM.Entity.Mine
     {
         [Header("Mine")]
         [SerializeField] private TextMeshProUGUI txtMineralsAmount = null;
-
+        
         private int minerals = 0;
         
         public int Minerals { get => minerals; }
         public Vector3 Position { get; private set; }
+        public Vector2Int Tile { get; private set; }
 
         private void Start()
-        {
-            Position = transform.position;
+        {            
             minerals = Random.Range(10, 20);
-            //txtMineralsAmount.text = minerals.ToString();
+        }
+
+        public void Init(Vector3 position)
+        {
+            transform.position = position;
+            Position = position;
+            Tile = new Vector2Int((int)position.x, (int)position.z);
         }
 
         public void Extract()

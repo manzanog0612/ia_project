@@ -7,12 +7,13 @@ using IA.FSM.Entity.Miner.Enums;
 using IA.FSM.Entity.Miner.States;
 
 using IA.Background.Entity.Home;
+using IA.Pathfinding;
 
 namespace IA.FSM.Entity.Miner
 {
     public class MinerBehaviour
     {
-        #region PRIVATE_METHODS
+        #region PRIVATE_FIELDS
         private Mine.Mine targetMine = null;
         private Home home = null;
 
@@ -22,6 +23,7 @@ namespace IA.FSM.Entity.Miner
         private bool setNewMine = false;
 
         private FSM fsm;
+        private Pathfinder pathfinder = null;
 
         private float deltaTime = 0;
         #endregion
@@ -32,10 +34,12 @@ namespace IA.FSM.Entity.Miner
         #endregion
 
         #region PUBLIC_METHODS
-        public void Init(Vector3 initialPostion, Home home, Action onLeaveMineralsInHome)
+        public void Init(Pathfinder pathfinder, Vector2Int initiaTile, Home home, Action onLeaveMineralsInHome, Func<int,int,Tile> onGetTile)
         {
+            this.pathfinder = pathfinder;
             this.home = home;
-            position = initialPostion;
+
+            position = new Vector3(initiaTile.x, 0, initiaTile.y);
 
             fsm = new FSM(Enum.GetValues(typeof(Enums.States)).Length, Enum.GetValues(typeof(Flags)).Length);
 
@@ -63,15 +67,16 @@ namespace IA.FSM.Entity.Miner
                 () => (new object[1] { OnLeaveIdle }));
 
             fsm.AddState<GoingToMineState>((int)Enums.States.GoingToMine,
-               () => (new object[5] { OnSetPosition, position, targetMine.Position, speed, deltaTime }));
+               () => (new object[4] { OnSetPosition, position, speed, deltaTime }),
+               () => (new object[3] { onGetTile.Invoke(initiaTile.x, initiaTile.y), onGetTile.Invoke(targetMine.Tile.x, targetMine.Tile.y), pathfinder }));
 
             fsm.AddState<MiningState>((int)Enums.States.Mining,
                () => (new object[4] { targetMine, inventory, OnMine, deltaTime }),
                () => (new object[2] { MinerConstants.miningTime, MinerConstants.inventoryCapacity }));
 
             fsm.AddState<ReturningToHome>((int)Enums.States.ReturningToHome,
-               () => (new object[5] { OnSetPosition, position, this.home.Position, speed, deltaTime }),
-               () => (new object[1] { OnLeaveMineralsInHome }));
+               () => (new object[4] { OnSetPosition, position, speed, deltaTime }),
+               () => (new object[4] { onGetTile.Invoke(targetMine.Tile.x, targetMine.Tile.y), onGetTile.Invoke((int)home.Position.x, (int)home.Position.y), pathfinder, OnLeaveMineralsInHome }));
 
             fsm.SetCurrentStateForced((int)Enums.States.Idle);
         }

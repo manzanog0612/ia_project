@@ -26,7 +26,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6893202259353982073}
@@ -320,10 +320,8 @@ MonoBehaviour:
   selectedMat: {fileID: 2100000, guid: e4276f54bdf5bd44b82c12d4725a58bb, type: 2}
   unselectedMat: {fileID: 2100000, guid: 10566973e88f1984c8413954f80616a8, type: 2}
   txtInventory: {fileID: 5320659295060594719}
-  targetMine: {fileID: 0}
   home: {fileID: 0}
-  speed: 8
-  inventory: 0
+  initialTile: {x: 0, y: 0}
 --- !u!136 &6467331032923918835
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -343,10 +341,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
+  m_Radius: 0.17
+  m_Height: 0.63
   m_Direction: 1
-  m_Center: {x: 0, y: 1.5, z: 0}
+  m_Center: {x: 0, y: 0.87, z: 0}
 --- !u!1 &8474062858455722109
 GameObject:
   m_ObjectHideFlags: 0
@@ -374,7 +372,7 @@ Transform:
   m_GameObject: {fileID: 8474062858455722109}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalPosition: {x: 0, y: 2.88, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
