@@ -83,11 +83,6 @@ namespace IA.Pathfinding
             return grid[x, y];
         }
 
-        public int Dist(Tile t1, Tile t2)
-        {
-            return Mathf.Abs(t1.x - t2.x) + Mathf.Abs(t1.y - t2.y);
-        }
-
         private List<Tile> FindNeighbours(int posX, int posY)
         {
             List<Tile> tiles = new List<Tile>();

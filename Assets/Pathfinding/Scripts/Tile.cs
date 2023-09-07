@@ -8,7 +8,6 @@ namespace IA.Pathfinding
         public int y;
         public List<Tile> neighbours;
         public bool walkable;
-        public Tile fromTile = null;
         public int weight = 0;
     }
 }

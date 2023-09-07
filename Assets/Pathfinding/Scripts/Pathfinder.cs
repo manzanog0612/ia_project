@@ -4,8 +4,10 @@ using UnityEngine;
 
 namespace IA.Pathfinding
 {
-    public class TileCosts
+    public class PathfinderTileData
     {
+        public Tile fromTile = null;
+
         public int gCost = 0; // distance from starting node
         public int hCost = 0; // distance from end node
 
@@ -39,7 +41,7 @@ namespace IA.Pathfinding
             List<Tile> openTiles = new List<Tile>();
             List<Tile> closedTiles = new List<Tile>();
 
-            TileCosts[,] tileCosts = GetGHCosts(startTile, targetTile, id);
+            PathfinderTileData[,] tileCosts = GetGHCosts(startTile, targetTile, id);
 
             openTiles.Add(startTile);
 
@@ -64,12 +66,12 @@ namespace IA.Pathfinding
                     int currentTileGCost = tileCosts[currentTile.x, currentTile.y].gCost;
                     int neighbourTileGCost = tileCosts[neighbour.x, neighbour.y].gCost;
 
-                    int newMovementCostToNeighbour = currentTileGCost + grid.Dist(currentTile, neighbour) + neighbour.weight;
+                    int newMovementCostToNeighbour = currentTileGCost + Dist(currentTile, neighbour) + neighbour.weight;
                     if (newMovementCostToNeighbour < neighbourTileGCost || !openTiles.Contains(neighbour))
                     {
                         tileCosts[neighbour.x, neighbour.y].gCost = newMovementCostToNeighbour;
-                        tileCosts[neighbour.x, neighbour.y].hCost = grid.Dist(neighbour, targetTile);
-                        neighbour.fromTile = currentTile;
+                        tileCosts[neighbour.x, neighbour.y].hCost = Dist(neighbour, targetTile);
+                        tileCosts[neighbour.x, neighbour.y].fromTile = currentTile;
 
                         if (!openTiles.Contains(neighbour))
                         {
@@ -84,8 +86,10 @@ namespace IA.Pathfinding
 
             while (tile != startTile)
             {
+                Debug.Log(id + ": " + tile.x + " - " + tile.y);
                 path.Add(new Vector2(tile.x, tile.y));
-                tile = tile.fromTile;
+                tile = tileCosts[tile.x, tile.y].fromTile;
+                
             }
 
             path.Reverse();
@@ -93,9 +97,9 @@ namespace IA.Pathfinding
             return path;
         }
 
-        private TileCosts[,] GetGHCosts(Tile start, Tile objective, int id)
+        private PathfinderTileData[,] GetGHCosts(Tile start, Tile objective, int id)
         {
-            TileCosts[,] tileCosts = new TileCosts[grid.Width, grid.Height];
+            PathfinderTileData[,] tileCosts = new PathfinderTileData[grid.Width, grid.Height];
 
             for (int i = 0; i < grid.Width; i++)
             {
@@ -103,6 +107,7 @@ namespace IA.Pathfinding
                 {
                     Tile tile = grid.GetTile(i, j);
 
+                    tileCosts[i, j] = new PathfinderTileData();
                     tileCosts[i, j].gCost = Dist(start, tile);
                     tileCosts[i, j].hCost = Dist(objective, tile);
                 }
@@ -116,7 +121,7 @@ namespace IA.Pathfinding
             return Mathf.Abs(t1.x - t2.x) + Mathf.Abs(t1.y - t2.y);
         }
 
-        private Tile FindOpenTileWithLowestFCost(List<Tile> openTiles, TileCosts[,] tileCosts)
+        private Tile FindOpenTileWithLowestFCost(List<Tile> openTiles, PathfinderTileData[,] tileCosts)
         {
             Tile lowestFCostTile = null;
             int lowestFCost = int.MaxValue;
