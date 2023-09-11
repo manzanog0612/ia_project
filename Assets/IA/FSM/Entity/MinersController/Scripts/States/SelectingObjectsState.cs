@@ -14,8 +14,8 @@ namespace IA.FSM.Entity.MinersController.States
         public override List<Action> GetBehaviours(params object[] parameters)
         {
             LayerMask layerMask = (LayerMask)parameters[0];
-            List<Miner.Miner> selectedMiners = parameters[1] as List<Miner.Miner>;
-            List<Mine.Mine> selectedMines = parameters[2] as List<Mine.Mine>;
+            List<MinerController.Miner> selectedMiners = parameters[1] as List<MinerController.Miner>;
+            List<MineController.Mine> selectedMines = parameters[2] as List<MineController.Mine>;
             string minerTag = (string)parameters[3];
             string mineTag = (string)parameters[4];
 
@@ -79,8 +79,8 @@ namespace IA.FSM.Entity.MinersController.States
 
         public override List<Action> GetOnExitBehaviours(params object[] parameters)
         {
-            List<Miner.Miner> selectedMiners = parameters[0] as List<Miner.Miner>;
-            List<Mine.Mine> selectedMines = parameters[1] as List<Mine.Mine>;
+            List<MinerController.Miner> selectedMiners = parameters[0] as List<MinerController.Miner>;
+            List<MineController.Mine> selectedMines = parameters[1] as List<MineController.Mine>;
 
             List<Action> exitBehaviours = new List<Action>();
 

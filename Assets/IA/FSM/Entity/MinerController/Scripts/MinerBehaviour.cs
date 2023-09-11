@@ -2,19 +2,19 @@ using System;
 
 using UnityEngine;
 
-using IA.FSM.Entity.Miner.Constants;
-using IA.FSM.Entity.Miner.Enums;
-using IA.FSM.Entity.Miner.States;
+using IA.FSM.Entity.MinerController.Constants;
+using IA.FSM.Entity.MinerController.Enums;
+using IA.FSM.Entity.MinerController.States;
 
 using IA.Background.Entity.Home;
 using IA.Pathfinding;
 
-namespace IA.FSM.Entity.Miner
+namespace IA.FSM.Entity.MinerController
 {
     public class MinerBehaviour
     {
         #region PRIVATE_FIELDS
-        private Mine.Mine targetMine = null;
+        private MineController.Mine targetMine = null;
         private Home home = null;
 
         private Vector3 position = Vector3.zero;
@@ -91,7 +91,7 @@ namespace IA.FSM.Entity.Miner
             this.deltaTime = deltaTime;
         }
 
-        public void SetMine(Mine.Mine targetMine)
+        public void SetMine(MineController.Mine targetMine)
         {
             this.targetMine = targetMine;
             setNewMine = true;

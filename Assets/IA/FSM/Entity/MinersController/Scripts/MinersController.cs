@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 using UnityEngine;
 
+using IA.FSM.Entity.MineController;
+
+using IA.FSM.Entity.MinerController;
 using IA.FSM.Entity.MinersController.Enums;
 using IA.FSM.Entity.MinersController.States;
 
@@ -16,14 +19,12 @@ namespace IA.FSM.Entity.MinersController
         [SerializeField] private string minerTag = null;
         [SerializeField] private string mineTag = null;
 
-        private List<Miner.Miner> selectedMiners = new List<Miner.Miner>();
-        private List<Mine.Mine> selectedMines = new List<Mine.Mine>();
+        private List<Miner> selectedMiners = new List<Miner>();
+        private List<Mine> selectedMines = new List<Mine>();
 
-        private ConcurrentBag<Miner.Miner> miners = new ConcurrentBag<Miner.Miner>();
+        private ConcurrentBag<Miner> miners = new ConcurrentBag<Miner>();
 
         private FSM fsm;
-
-        private Dictionary<int, Vector3> minersPositions = new Dictionary<int, Vector3>();
 
         private void Start()
         {
@@ -48,7 +49,7 @@ namespace IA.FSM.Entity.MinersController
 
             fsm.SetCurrentStateForced((int)Enums.States.Idle);
 
-            Miner.Miner[] minersArray = FindObjectsOfType<Miner.Miner>();
+            Miner[] minersArray = FindObjectsOfType<Miner>();
 
             for (int i = 0; i < minersArray.Length; i++)
             {

@@ -1,4 +1,4 @@
-namespace IA.FSM.Entity.Miner.Enums
+namespace IA.FSM.Entity.MinerController.Enums
 {
     enum States
     {

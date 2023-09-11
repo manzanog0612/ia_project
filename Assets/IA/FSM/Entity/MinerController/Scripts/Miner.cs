@@ -10,7 +10,7 @@ using TMPro;
 
 using Grid = IA.Pathfinding.Grid;
 
-namespace IA.FSM.Entity.Miner
+namespace IA.FSM.Entity.MinerController
 {
     public class Miner : SelectableObject
     {

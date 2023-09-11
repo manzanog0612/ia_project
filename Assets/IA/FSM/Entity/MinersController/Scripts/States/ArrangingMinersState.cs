@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using IA.FSM.Entity.MineController;
+using IA.FSM.Entity.MinerController;
 using IA.FSM.Entity.MinersController.Enums;
 
 namespace IA.FSM.Entity.MinersController.States
@@ -9,8 +11,8 @@ namespace IA.FSM.Entity.MinersController.States
     {
         public override List<Action> GetBehaviours(params object[] parameters)
         {
-            List<Miner.Miner> miners = parameters[0] as List<Miner.Miner>;
-            List<Mine.Mine> mines = parameters[1] as List<Mine.Mine>;
+            List<Miner> miners = parameters[0] as List<Miner>;
+            List<Mine> mines = parameters[1] as List<Mine>;
 
             List<Action> behaviours = new List<Action>();
 
@@ -55,8 +57,8 @@ namespace IA.FSM.Entity.MinersController.States
 
         public override List<Action> GetOnExitBehaviours(params object[] parameters)
         {
-            List<Miner.Miner> miners = parameters[0] as List<Miner.Miner>;
-            List<Mine.Mine> mines = parameters[1] as List<Mine.Mine>;
+            List<Miner> miners = parameters[0] as List<Miner>;
+            List<Mine> mines = parameters[1] as List<Mine>;
 
             List<Action> exitBehaviours = new List<Action>();
 

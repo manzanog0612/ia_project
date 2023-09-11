@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using IA.FSM.Entity.Miner.Enums;
+using IA.FSM.Entity.MinerController.Enums;
 
-namespace IA.FSM.Entity.Miner.States
+namespace IA.FSM.Entity.MinerController.States
 {
     public class IdleState : State
     {

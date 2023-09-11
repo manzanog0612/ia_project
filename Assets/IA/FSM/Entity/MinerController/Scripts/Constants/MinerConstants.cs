@@ -1,4 +1,4 @@
-namespace IA.FSM.Entity.Miner.Constants
+namespace IA.FSM.Entity.MinerController.Constants
 {
     public class MinerConstants
     {

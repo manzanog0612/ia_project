@@ -3,15 +3,16 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using IA.FSM.Entity.Miner.Enums;
+using IA.FSM.Entity.MinerController.Enums;
 using IA.Pathfinding;
 
-namespace IA.FSM.Entity.Miner.States
+namespace IA.FSM.Entity.MinerController.States
 {
-    public class GoingToMineState : State
+    public class ReturningToHome : State
     {
         private List<Vector2> path = null;
         private int indexOfMovement = 0;
+        Action onReachHome = null;
 
         public override List<Action> GetBehaviours(params object[] parameters)
         {
@@ -33,12 +34,13 @@ namespace IA.FSM.Entity.Miner.States
                     indexOfMovement++;
 
                     if (indexOfMovement == path.Count)
-                    { 
-                        Transition((int)Flags.OnReachMine); 
+                    {
+                        onReachHome.Invoke();
+                        Transition((int)Flags.OnReachHome);
                     }
                 }
             });
-            behaviours.Add(() => Debug.Log("GOING TO MINE"));
+            behaviours.Add(() => Debug.Log("RETURNING TO HOME"));
 
             return behaviours;
         }
@@ -48,6 +50,7 @@ namespace IA.FSM.Entity.Miner.States
             Tile startTile = parameters[0] as Tile;
             Tile targetTile = parameters[1] as Tile;
             Pathfinder pathfinder = parameters[2] as Pathfinder;
+            onReachHome = parameters[3] as Action;
 
             path = pathfinder.FindPath(startTile, targetTile);
             indexOfMovement = 0;

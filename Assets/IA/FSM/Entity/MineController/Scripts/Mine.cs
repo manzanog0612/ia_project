@@ -4,7 +4,7 @@ using IA.Common.Entity.SelectableObject;
 
 using TMPro;
 
-namespace IA.FSM.Entity.Mine
+namespace IA.FSM.Entity.MineController
 {
     public class Mine : SelectableObject
     {

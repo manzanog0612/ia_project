@@ -10,13 +10,13 @@ namespace IA.FSM.Entity.MinesController
         [SerializeField] private List<Vector2Int> minesPositions = new List<Vector2Int>();
         [SerializeField] private GameObject minePrefab = null;
 
-        private List<Mine.Mine> mines = new List<Mine.Mine>();
+        private List<MineController.Mine> mines = new List<MineController.Mine>();
 
         private void Start()
         {
             for (int i = 0; i < minesPositions.Count; i++)
             {
-                Mine.Mine mine = Instantiate(minePrefab, transform).GetComponent<Mine.Mine>();
+                MineController.Mine mine = Instantiate(minePrefab, transform).GetComponent<MineController.Mine>();
                 mine.Init(new Vector3(minesPositions[i].x, 0, minesPositions[i].y));
                 mines.Add(mine);
             }
