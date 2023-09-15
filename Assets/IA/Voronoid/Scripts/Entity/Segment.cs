@@ -31,18 +31,10 @@ namespace IA.Voronoid.Entity
 
             mediatrix = new Vector2((origin.x + end.x) / 2, (origin.y + end.y) / 2);
             direction = Vector2.Perpendicular(new Vector2(end.x - origin.x, end.y - origin.y));
-
         }
         #endregion
 
         #region PUBLIC_METHODS
-        public EcuationLine GetEcuationLine(float lineLength)
-        {
-            Vector2 p1 = mediatrix - direction * lineLength;
-            Vector2 p2 = mediatrix + direction * lineLength;
-            return new EcuationLine(p1, p2);
-        }
-
         public void Draw()
         {
             Gizmos.DrawLine(origin, end);

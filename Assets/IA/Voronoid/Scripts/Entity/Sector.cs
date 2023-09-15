@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using UnityEditor;
 using UnityEngine;
+
 using Random = UnityEngine.Random;
 
 namespace IA.Voronoid.Entity
@@ -36,14 +36,6 @@ namespace IA.Voronoid.Entity
         #endregion
 
         #region PUBLIC_METHODS
-        public void AddSegmentLimits(Vector3[] gridLimits)
-        {
-            segments.Add(new Segment(gridLimits[0], gridLimits[1]));
-            segments.Add(new Segment(gridLimits[1], gridLimits[2]));
-            segments.Add(new Segment(gridLimits[2], gridLimits[3]));
-            segments.Add(new Segment(gridLimits[3], gridLimits[0]));
-        }
-
         public void AddSegmentLimits(List<Limit> limits)
         {
             for (int i = 0; i < limits.Count; i++)
@@ -99,19 +91,25 @@ namespace IA.Voronoid.Entity
 
                     float maxDistance = Vector2.Distance(intersection.Value, segments[i].Origin);
 
-                    bool checkValidPoint = false;
+                    // This check is because if any of the points that aren't in the calculation (the points of the segments, origin and end)
+                    // are closer to any of the other points it means that there is a closer intersection that has been calculated yet or it
+                    // needs to be calculated so, if we find a smaller distance, we flag the found intersection as invalid
+                    bool checkValidIntersection = true;
                     for (int k = 0; k < segments.Count; k++)
                     {
-                        if (k == i || k == j) continue;
+                        if (k == i || k == j)
+                        { 
+                            continue; 
+                        }
 
-                        if (CheckIfHaveAnotherPositionCloser(intersection.Value, segments[k].End, maxDistance))
+                        if (Vector2.Distance(intersection.Value, segments[k].End) < maxDistance)
                         {
-                            checkValidPoint = true;
+                            checkValidIntersection = false;
                             break;
                         }
                     }
 
-                    if (!checkValidPoint)
+                    if (checkValidIntersection)
                     {
                         intersections.Add(intersection.Value);
                         segments[i].Intersections.Add(intersection.Value);
@@ -122,21 +120,39 @@ namespace IA.Voronoid.Entity
 
             segments.RemoveAll((s) => s.Intersections.Count != 2);
 
-            SortIntersections();
+            SortIntersectionsByAngle();
             SetPointsInSector();
         }
 
+        //https://www.youtube.com/watch?v=RSXM9bgqxJM
+        public bool CheckPointInSector(Vector3 point)
+        {
+            if (points == null)
+            { 
+                return false; 
+            }
+
+            int edges = 0;
+            Vector2 end = points[^1];
+            
+            for (int i = 0; i < points.Length; i++)
+            {
+                Vector2 start = end;
+                end = points[i];
+
+                if ((point.y < start.y) ^ (point.y < end.y) &&
+                     point.x < start.x + ((point.y - start.y) / (end.y - start.y)) * (end.x - start.x))
+                {
+                    edges++;
+                }
+            }
+
+            return edges % 2 == 1;
+        }
         #endregion
 
         #region PRIVATE_METHODS
-        private bool CheckIfHaveAnotherPositionCloser(Vector2 intersectionPoint, Vector2 pointEnd, float maxDistance)
-        {
-            float distance = Vector2.Distance(intersectionPoint, pointEnd);
-            return distance < maxDistance;
-        }
-
-
-        public Vector2 GetIntersection(Segment seg1, Segment seg2, Vector2Int gridSize)
+        public Vector2? GetIntersection(Segment seg1, Segment seg2, Vector2Int gridSize)
         {
             Vector2 intersection = Vector2.zero;
         
@@ -148,7 +164,7 @@ namespace IA.Voronoid.Entity
             //cross product to know if segments are paralel
             if (((p1s.x - p1e.x) * (p2s.y - p2e.y) - (p1s.y - p1e.y) * (p2s.x - p2e.x)) == 0) 
             { 
-                return intersection; 
+                return null; 
             }
 
             float p1CrossDiff = p1s.x * p1e.y - p1s.y * p1e.x; //cross difference
@@ -164,103 +180,7 @@ namespace IA.Voronoid.Entity
             return intersection;
         }
 
-        private Vector2? GetIntersection2(Segment seg1, Segment seg2, Vector2Int gridSize)
-        {
-            bool noIntersectionFound = false;
-            Vector2 intersection = Vector2.zero;
-        
-            EcuationLine seg1EcuationLine = seg1.GetEcuationLine(gridSize.magnitude);
-            EcuationLine seg2EcuationLine = seg2.GetEcuationLine(gridSize.magnitude);
-
-
-
-            //Y_INTERCEPT_TYPE seg1IT = seg1EcuationLine.YInterceptType;
-            //Y_INTERCEPT_TYPE seg2IT = seg2EcuationLine.YInterceptType;
-            //
-            //if (seg1EcuationLine.Slope == 0 || seg2EcuationLine.Slope == 0)
-            //{
-            //    if (seg1IT == Y_INTERCEPT_TYPE.ALL)
-            //    {
-            //        switch (seg2IT)
-            //        {
-            //            case Y_INTERCEPT_TYPE.ONE_VALUE:
-            //                intersection.x = (seg1EcuationLine.YIntercept - seg2EcuationLine.YIntercept) / (seg2EcuationLine.Slope - seg1EcuationLine.Slope);
-            //                intersection.y = 0;
-            //                break;
-            //            case Y_INTERCEPT_TYPE.ALL:
-            //                intersection = seg1.Mediatrix; //idk
-            //                break;
-            //            case Y_INTERCEPT_TYPE.NONE:
-            //                noIntersectionFound = true;
-            //                break;
-            //        }
-            //    }
-            //    else //NONE
-            //    {
-            //        switch (seg2IT)
-            //        {
-            //            case Y_INTERCEPT_TYPE.ONE_VALUE:
-            //                intersection.x = (seg1EcuationLine.YIntercept - seg2EcuationLine.YIntercept) / (seg2EcuationLine.Slope - seg1EcuationLine.Slope);
-            //                intersection.y = 0;
-            //                break;
-            //            case Y_INTERCEPT_TYPE.ALL:
-            //                intersection.x = (seg1EcuationLine.YIntercept - seg2EcuationLine.YIntercept) / (seg2EcuationLine.Slope - seg1EcuationLine.Slope);
-            //                intersection.y = 0;
-            //                break;
-            //            case Y_INTERCEPT_TYPE.NONE:
-            //                noIntersectionFound = true;
-            //                break;
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    intersection.x = (seg1EcuationLine.YIntercept - seg2EcuationLine.YIntercept) / (seg2EcuationLine.Slope - seg1EcuationLine.Slope);
-            //    intersection.y = seg1EcuationLine.Slope * intersection.x + seg1EcuationLine.YIntercept;
-            //
-            /*
-
-            To find X:
-
-            ● m1 * x + b1 = m2 * x + b2
-            ● m1 * x + b1 - b2 = m2 * x
-            ● b1 - b2 = m2 * x - m1 * x
-            ● b1 - b2 = (m2 - m1) * x
-            ● (b1 - b2) / (m2 - m1) = x
-
-            To find Y:
-
-            ● y = m1 * x + b1
-
-            */
-            //}
-
-
-            //if (Math.Abs(seg1EcuationLine.Slope - seg2EcuationLine.Slope) < double.Epsilon)
-            //{
-            //    if (Math.Abs(seg1EcuationLine.YIntercept - seg2EcuationLine.YIntercept) < double.Epsilon)
-            //    {
-            //        intersection.y = seg1EcuationLine.YIntercept;
-            //    }
-            //    else
-            //    {
-            //        noIntersectionFound = true;
-            //    }
-            //}
-            //else
-            //{
-            //
-            //    intersection.x = (seg2EcuationLine.YIntercept - seg1EcuationLine.YIntercept) / (seg1EcuationLine.Slope - seg2EcuationLine.Slope);
-            //    intersection.y = seg1EcuationLine.Slope * intersection.x + seg1EcuationLine.YIntercept;
-            //}
-
-            intersection.x = (seg1EcuationLine.b * seg2EcuationLine.c - seg2EcuationLine.b * seg1EcuationLine.c) / (-seg1EcuationLine.a * seg2EcuationLine.b - seg2EcuationLine.a * seg1EcuationLine.b);
-            intersection.y = (seg1EcuationLine.c * seg2EcuationLine.a - seg1EcuationLine.a * seg2EcuationLine.c) / (seg1EcuationLine.a * seg2EcuationLine.b - seg2EcuationLine.a * seg1EcuationLine.b);
-
-            return noIntersectionFound ? null : intersection;
-        }
-
-        private void SortIntersections()
+        private void SortIntersectionsByAngle()
         {
             List<IntersectionPoint> intersectionPoints = new List<IntersectionPoint>();
             for (int i = 0; i < intersections.Count; i++)
@@ -269,16 +189,28 @@ namespace IA.Voronoid.Entity
             }
 
             float minX = intersectionPoints[0].Position.x;
-            float maxX = intersectionPoints[0].Position.x;
             float minY = intersectionPoints[0].Position.y;
-            float maxY = intersectionPoints[0].Position.y;
+            float maxX = minX;
+            float maxY = minY;
 
             for (int i = 0; i < intersections.Count; i++)
             {
-                if (intersectionPoints[i].Position.x < minX) minX = intersectionPoints[i].Position.x;
-                if (intersectionPoints[i].Position.x > maxX) maxX = intersectionPoints[i].Position.x;
-                if (intersectionPoints[i].Position.y < minY) minY = intersectionPoints[i].Position.y;
-                if (intersectionPoints[i].Position.y > maxY) maxY = intersectionPoints[i].Position.y;
+                if (intersectionPoints[i].Position.x < minX)
+                {
+                    minX = intersectionPoints[i].Position.x;
+                }
+                if (intersectionPoints[i].Position.x > maxX)
+                {
+                    maxX = intersectionPoints[i].Position.x;
+                }
+                if (intersectionPoints[i].Position.y < minY)
+                {
+                    minY = intersectionPoints[i].Position.y;
+                }
+                if (intersectionPoints[i].Position.y > maxY) 
+                {
+                    maxY = intersectionPoints[i].Position.y;
+                }
             }
 
             Vector2 center = new Vector2(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2);
@@ -286,9 +218,10 @@ namespace IA.Voronoid.Entity
             for (int i = 0; i < intersectionPoints.Count; i++)
             {
                 Vector2 pos = intersectionPoints[i].Position;
-
-                intersectionPoints[i].Angle = Mathf.Acos((pos.x - center.x) /
-                    Mathf.Sqrt(Mathf.Pow(pos.x - center.x, 2f) + Mathf.Pow(pos.y - center.y, 2f)));
+                Vector2 pointDirVector = pos - center;
+                //                                   __________
+                //                            x / -l/ px² + py²
+                intersectionPoints[i].Angle = Mathf.Acos(pointDirVector.x / Mathf.Sqrt(Mathf.Pow(pointDirVector.x, 2f) + Mathf.Pow(pointDirVector.y, 2f)));
 
                 if (pos.y > center.y)
                 {

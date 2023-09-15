@@ -11,19 +11,20 @@ namespace IA.Voronoid.Generator
         #region EXPOSED_FIELDS
         [SerializeField] private Transform[] positions = null;
         [SerializeField] private Vector2Int gridSize = default;
+        [SerializeField] private bool onPoligon = false;//
+        [SerializeField] private Transform checker;//
+        [SerializeField] private int sectorToCheck = 0;//
         #endregion
 
         #region PRIVATE_FIELDS
-        private List<Vector3> gridLimits = new List<Vector3>();
-        private List<Vector2> voronoiLines = new List<Vector2>();
-
         private List<Limit> limits = null;
         private List<Sector> sectors = new List<Sector>();
+        private bool startCheck = false;//
         #endregion
 
+        #region UNITY_CALLS
         private void Start()
         {
-            SetLimits(gridSize);
             InitLimits();
 
             sectors.Clear();
@@ -51,26 +52,30 @@ namespace IA.Voronoid.Generator
             {
                 sectors[i].SetIntersections(gridSize);
             }
+
+            startCheck = true;
+        }
+
+        private void Update()
+        {
+            if (!startCheck)
+            {
+                return;
+            }
+
+            onPoligon = sectors[sectorToCheck].CheckPointInSector(checker.position);
         }
 
         private void OnDrawGizmos()
         {
             Draw();
         }
+        #endregion
 
-        private void SetLimits(Vector2Int gridSize)
-        {
-            gridLimits.Add(new Vector2(0, 0)); //left down
-            gridLimits.Add(new Vector2(0, gridSize.y)); //left up
-            gridLimits.Add(new Vector2(gridSize.x, gridSize.y)); //right up
-            gridLimits.Add(new Vector2(gridSize.x, 0)); //right down
-        }
-
+        #region PRIVATE_METHODS
         private void InitLimits()
         {
             limits = new List<Limit>();
-
-            //Vector2 offset = new Vector2(NodeUtils.offset.x, NodeUtils.offset.y) / 2f;
 
             limits.Add(new Limit(Vector2.zero, DIRECTION.LEFT));
             limits.Add(new Limit(new Vector2(0f, gridSize.y - 1), DIRECTION.UP));
@@ -88,5 +93,6 @@ namespace IA.Voronoid.Generator
                 sectors[i].DrawSegments();
             }
         }
+        #endregion
     }
 }
