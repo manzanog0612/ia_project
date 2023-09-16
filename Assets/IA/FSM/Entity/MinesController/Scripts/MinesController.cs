@@ -2,24 +2,38 @@ using UnityEngine;
 
 using System.Collections.Generic;
 
+using IA.FSM.Entity.MineController;
+
 namespace IA.FSM.Entity.MinesController
 {
     public class MinesController : MonoBehaviour
     {
-        [SerializeField] private Pathfinding.Grid grid = null;
-        [SerializeField] private List<Vector2Int> minesPositions = new List<Vector2Int>();
+        #region EXPOSED_FIELDS
         [SerializeField] private GameObject minePrefab = null;
+        #endregion
 
-        private List<MineController.Mine> mines = new List<MineController.Mine>();
+        #region PRIVATE_FIELDS
+        private List<Mine> mines = new List<Mine>();
+        #endregion
 
-        private void Start()
+        #region PUBLIC_METHODS
+        public void Init(Vector2Int[] minesPositions)
         {
-            for (int i = 0; i < minesPositions.Count; i++)
+            for (int i = 0; i < minesPositions.Length; i++)
             {
-                MineController.Mine mine = Instantiate(minePrefab, transform).GetComponent<MineController.Mine>();
-                mine.Init(new Vector3(minesPositions[i].x, 0, minesPositions[i].y));
+                Mine mine = Instantiate(minePrefab, transform).GetComponent<Mine>();
+                mine.Init(minesPositions[i]);
                 mines.Add(mine);
             }
         }
+
+        public void UpdateMines()
+        {
+            for (int i = 0; i < mines.Count; i++)
+            {
+                mines[i].UpdateText();
+            }
+        }
+        #endregion
     }
 }

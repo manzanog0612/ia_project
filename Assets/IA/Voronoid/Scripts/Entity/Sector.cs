@@ -16,14 +16,17 @@ namespace IA.Voronoid.Entity
         private List<Vector2> intersections = null;
         private Vector3[] points = null;
         private Vector3 position = Vector3.zero;
+        private List<Sector> neighbours = null;
         #endregion
 
         #region PROPERTIES
         public Vector3 Position => position;
+        public List<Vector2> Intersections { get => intersections; }
+        public List<Sector> Neighbours { get => neighbours; }
         #endregion
 
         #region CONSTRUCTORS
-        public Sector(Vector3 position)
+        public Sector(Vector2 position)
         {
             this.position = position;
 
@@ -36,6 +39,11 @@ namespace IA.Voronoid.Entity
         #endregion
 
         #region PUBLIC_METHODS
+        public void SetNeighbours(List<Sector> neighbours)
+        {
+            this.neighbours = neighbours;
+        }
+
         public void AddSegmentLimits(List<Limit> limits)
         {
             for (int i = 0; i < limits.Count; i++)
@@ -43,7 +51,7 @@ namespace IA.Voronoid.Entity
                 Vector2 origin = position;
                 Vector2 final = limits[i].GetOutsitePosition(origin);
 
-                segments.Add(new Segment(origin, final));
+                segments.Add(new Segment(origin, final, true));
             }
         }
 
@@ -84,7 +92,7 @@ namespace IA.Voronoid.Entity
 
                     Vector2? intersection = GetIntersection(segments[i], segments[j], gridSize);
 
-                    if (!intersection.HasValue || intersections.Contains(intersection.Value))
+                    if (!intersection.HasValue)
                     {
                         continue;
                     }

@@ -2,9 +2,9 @@ using UnityEngine;
 
 using TMPro;
 
-namespace IA.FSM.Entity.MineController
+namespace IA.Game.Entity.UrbanCenterController
 {
-    public class Mine : MonoBehaviour
+    public class UrbanCenter : MonoBehaviour
     {
         #region EXPOSED_FIELDS
         [SerializeField] private TextMeshProUGUI txtMineralsAmount = null;
@@ -15,16 +15,12 @@ namespace IA.FSM.Entity.MineController
         #endregion
 
         #region PROPERTIES
-        public int Minerals { get => minerals; }
         public Vector2Int Tile { get; private set; }
         #endregion
 
         #region PUBLIC_METHODS
         public void Init(Vector2Int tile)
         {
-            minerals = Random.Range(10, 20);
-
-            transform.position = new Vector2(tile.x, tile.y);
             Tile = tile;
         }
 
@@ -33,10 +29,10 @@ namespace IA.FSM.Entity.MineController
             txtMineralsAmount.text = minerals.ToString();
         }
 
-        public void Extract()
+        public void PlaceMinerals(int minerals)
         {
-            minerals--;
+            this.minerals += minerals;
         }
-        #endregion        
+        #endregion
     }
 }

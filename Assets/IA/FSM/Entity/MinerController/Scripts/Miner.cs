@@ -1,10 +1,11 @@
+using System.Collections.Generic;
+
 using UnityEngine;
 
-using IA.Background.Entity.Home;
-
-using IA.Common.Entity.SelectableObject;
-
+using IA.FSM.Entity.MinerController.Constants;
+using IA.Game.Entity.UrbanCenterController;
 using IA.Pathfinding;
+using IA.Voronoid.Generator;
 
 using TMPro;
 
@@ -12,35 +13,73 @@ using Grid = IA.Pathfinding.Grid;
 
 namespace IA.FSM.Entity.MinerController
 {
-    public class Miner : SelectableObject
+    public class Miner : MonoBehaviour
     {
-        [Header("Miner")]
+        #region EXPOSED_FIELDS
         [SerializeField] private TextMeshProUGUI txtInventory = null;
-        [SerializeField] private Home home = null;
-        [SerializeField] private Vector2Int initialTile = default;
+        #endregion
 
+        #region PRIVATE_FIELDS
         private Pathfinder pathfinder = new Pathfinder();
         private MinerBehaviour minerBehaviour = new MinerBehaviour();
+        private VoronoidGenerator voronoidGenerator = new VoronoidGenerator();
 
+        private UrbanCenter urbanCenter = null;
+        private Grid grid = null;
+
+        private int[,] weights = null;
+        #endregion
+
+        #region PROPERTIES
         public MinerBehaviour MinerBehaviour { get => minerBehaviour; }
+        #endregion
 
-        private void Start()
+        #region PUBLIC_METHODS
+        public void Init(UrbanCenter urbanCenter, Grid grid, Vector2Int[] minesPositions)
         {
-            Grid grid = FindObjectOfType<Grid>();
-            pathfinder.Init(grid);
-            minerBehaviour.Init(pathfinder, initialTile, home, OnLeaveMineralsInHome, grid.GetTile);
+            this.urbanCenter = urbanCenter;
+            this.grid = grid;
+
+            Dictionary<TILE_TYPE, int> tileWeigths = MinerConstants.GetTileWeigths();
+
+            CalculateTilesWeights(tileWeigths);
+
+            pathfinder.Init(grid, tileWeigths);
+            minerBehaviour.Init(pathfinder, urbanCenter.Tile, urbanCenter, OnLeaveMineralsInHome, grid.GetTile);
+            voronoidGenerator.Configure(minesPositions, weights);
         }
 
-        private void Update()
+        public void UpdateBehaviour()
         {
             transform.position = MinerBehaviour.Position;
             minerBehaviour.SetDeltaTime(Time.deltaTime);
             txtInventory.text = minerBehaviour.Inventory.ToString();
         }
 
+        private void OnDrawGizmos()
+        {
+            voronoidGenerator.Draw();
+        }
+
+        public void CalculateTilesWeights(Dictionary<TILE_TYPE, int> tileWeigths)
+        {
+            weights = new int[grid.Width, grid.Height];
+
+            for (int x = 0; x < grid.Width; x++)
+            {
+                for (int y = 0; y < grid.Height; y++)
+                {
+                    weights[x,y] = tileWeigths[grid.GetTile(x, y).type];
+                }
+            }
+        }
+        #endregion
+
+        #region PRIVATE_METHODS
         private void OnLeaveMineralsInHome()
         {
-            home.PlaceMinerals(minerBehaviour.Inventory);
+            urbanCenter.PlaceMinerals(minerBehaviour.Inventory);
         }
+        #endregion
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using IA.FSM.Entity.MinerController.Enums;
+using IA.FSM.Entity.MineController;
 
 namespace IA.FSM.Entity.MinerController.States
 {
@@ -16,7 +17,7 @@ namespace IA.FSM.Entity.MinerController.States
 
         public override List<Action> GetBehaviours(params object[] parameters)
         {
-            MineController.Mine targetMine = parameters[0] as MineController.Mine;
+            Mine targetMine = parameters[0] as Mine;
             int inventory = (int)parameters[1];
             Action onMine = parameters[2] as Action;
             float deltaTime = (float)parameters[3];

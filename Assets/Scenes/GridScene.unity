@@ -425,7 +425,6 @@ MonoBehaviour:
   height: 8
   prefabTile: {fileID: 1282586454334708566, guid: bfb3da36248c08c46920be0d63e8d816, type: 3}
   notWalkableMat: {fileID: 2100000, guid: bb8477962f2168e4b97eef7345031fed, type: 2}
-  blockedMat: {fileID: 2100000, guid: 61c8bc1f6a3c19d48a0e74360260c7d3, type: 2}
   walkedMat: {fileID: 2100000, guid: f627d5bf2836e3e47b409c99feecbebc, type: 2}
   gridMat: {fileID: 2100000, guid: 49e62eac4d4b31c448842a5ac817869c, type: 2}
 --- !u!4 &957593625
@@ -452,7 +451,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1349405478}
-  - component: {fileID: 1349405481}
   m_Layer: 0
   m_Name: Pathfinder
   m_TagString: Untagged
@@ -476,21 +474,6 @@ Transform:
   - {fileID: 740687285}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1349405481
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1349405477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 823eb1aefdb14be469c85c40c50fac69, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  grid: {fileID: 957593624}
-  objetive: {x: 0, y: 7}
-  start: {x: 7, y: 7}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

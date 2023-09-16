@@ -11,6 +11,7 @@ namespace IA.Voronoid.Entity
         private Vector2 end = Vector2.zero;
         private Vector2 direction = Vector2.zero;
         private Vector2 mediatrix = Vector2.zero;
+        private bool isLimit = false;
 
         private List<Vector2> intersections = new List<Vector2>();
         #endregion
@@ -21,13 +22,15 @@ namespace IA.Voronoid.Entity
         public Vector2 Mediatrix { get => mediatrix; }
         public Vector2 Direction { get => direction; }
         public List<Vector2> Intersections { get => intersections; }
+        public bool IsLimit { get => isLimit; }
         #endregion
 
         #region CONSTRUCTORS
-        public Segment(Vector2 origin, Vector2 end)
+        public Segment(Vector2 origin, Vector2 end, bool isLimit = false)
         {
             this.origin = origin;
             this.end = end;
+            this.isLimit = isLimit;
 
             mediatrix = new Vector2((origin.x + end.x) / 2, (origin.y + end.y) / 2);
             direction = Vector2.Perpendicular(new Vector2(end.x - origin.x, end.y - origin.y));

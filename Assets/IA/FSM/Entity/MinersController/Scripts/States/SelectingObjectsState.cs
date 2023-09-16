@@ -5,8 +5,6 @@ using UnityEngine;
 
 using IA.FSM.Entity.MinersController.Enums;
 
-using IA.Common.Entity.SelectableObject;
-
 namespace IA.FSM.Entity.MinersController.States
 {
     public class SelectingObjectsState : State
@@ -37,14 +35,14 @@ namespace IA.FSM.Entity.MinersController.States
                     if (Physics.Raycast(ray, out hit))
                     {
                         GameObject go = hit.collider.gameObject;
-                        SelectableObject selectableObject = go.GetComponent<SelectableObject>();
+                        //SelectableObject selectableObject = go.GetComponent<SelectableObject>();
 
                         if (layerMask == (layerMask | (1 << go.layer)))
                         {
                             if (CheckObjectSelected(go, minerTag, selectedMiners) ||
                                 CheckObjectSelected(go, mineTag, selectedMines))
                             {
-                                selectableObject.Select();
+                                //selectableObject.Select();
                             }
                         }
                     }
@@ -86,15 +84,15 @@ namespace IA.FSM.Entity.MinersController.States
 
             exitBehaviours.Add(() =>
             {
-                for (int i = 0; i < selectedMiners.Count; i++)
-                {
-                    selectedMiners[i].Deselect();
-                }
-
-                for (int i = 0; i < selectedMines.Count; i++)
-                {
-                    selectedMines[i].Deselect();
-                }
+                //for (int i = 0; i < selectedMiners.Count; i++)
+                //{
+                //    selectedMiners[i].Deselect();
+                //}
+                //
+                //for (int i = 0; i < selectedMines.Count; i++)
+                //{
+                //    selectedMines[i].Deselect();
+                //}
             });
 
             return exitBehaviours;

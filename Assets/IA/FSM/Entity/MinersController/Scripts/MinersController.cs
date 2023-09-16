@@ -6,27 +6,38 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 using IA.FSM.Entity.MineController;
-
 using IA.FSM.Entity.MinerController;
 using IA.FSM.Entity.MinersController.Enums;
 using IA.FSM.Entity.MinersController.States;
+using IA.Game.Entity.UrbanCenterController;
+
+using Grid = IA.Pathfinding.Grid;
 
 namespace IA.FSM.Entity.MinersController
 {
     public class MinersController : MonoBehaviour
-    {        
+    {
+        #region EXPOSED_FIELDS
         [SerializeField] private LayerMask objectsLayerMask = default;
         [SerializeField] private string minerTag = null;
         [SerializeField] private string mineTag = null;
 
+        [SerializeField] private GameObject minerPrefab = null;
+        [SerializeField] private Transform minersHolder = null;
+        #endregion
+
+        #region PRIVATE_FIELDS
         private List<Miner> selectedMiners = new List<Miner>();
         private List<Mine> selectedMines = new List<Mine>();
 
-        private ConcurrentBag<Miner> miners = new ConcurrentBag<Miner>();
+        private ConcurrentBag<Miner> minersFsm = new ConcurrentBag<Miner>();
+        private Miner[] miners = null;
 
         private FSM fsm;
+        #endregion
 
-        private void Start()
+        #region PUBLIC_METHODS
+        public void Init(int minersAmount, Grid grid, UrbanCenter urbanCenter, Vector2Int[] minesPositions)
         {
             fsm = new FSM(Enum.GetValues(typeof(Enums.States)).Length, Enum.GetValues(typeof(Flags)).Length);
 
@@ -38,7 +49,7 @@ namespace IA.FSM.Entity.MinersController
 
             fsm.AddState<IdleState>((int)Enums.States.Idle,
                 () => (new object[1] { objectsLayerMask }));
-            
+
             fsm.AddState<SelectingObjectsState>((int)Enums.States.SelectingObjects,
                 () => (new object[5] { objectsLayerMask, selectedMiners, selectedMines, minerTag, mineTag }), null,
                 () => (new object[2] { selectedMiners, selectedMines }));
@@ -49,24 +60,31 @@ namespace IA.FSM.Entity.MinersController
 
             fsm.SetCurrentStateForced((int)Enums.States.Idle);
 
-            Miner[] minersArray = FindObjectsOfType<Miner>();
+            miners = new Miner[minersAmount];
 
-            for (int i = 0; i < minersArray.Length; i++)
+            for (int i = 0; i < miners.Length; i++)
             {
-                miners.Add(minersArray[i]);
+                miners[i] = Instantiate(minerPrefab, minersHolder).GetComponent<Miner>();
+                miners[i].Init(urbanCenter, grid, minesPositions);
+                minersFsm.Add(miners[i]);
             }
         }
 
-        private void Update()
+        public void UpdateBehaviours()
         {
-            Parallel.ForEach(miners,
+            Parallel.ForEach(minersFsm,
                 miner =>
                 {
                     miner.MinerBehaviour.UpdateFsm();
                 });
 
+            for (int i = 0; i < minersFsm.Count; i++)
+            {
+                miners[i].UpdateBehaviour();
+            }
+
             fsm.Update();
         }
-
+        #endregion
     }
 }

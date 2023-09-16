@@ -16,16 +16,16 @@ namespace IA.Pathfinding
 
     public class Pathfinder
     {
-        static int id = 0;
-
         private Grid grid;
         private Tile startTile;
         private Tile targetTile;
 
-        public void Init(Grid grid)
+        private Dictionary<TILE_TYPE, int> tilesWeights;
+
+        public void Init(Grid grid, Dictionary<TILE_TYPE, int> tilesWeights)
         {
             this.grid = grid;
-            id++;
+            this.tilesWeights = tilesWeights;
         }
 
         public List<Vector2> FindPath(Tile startTile, Tile targetTile)
@@ -41,7 +41,7 @@ namespace IA.Pathfinding
             List<Tile> openTiles = new List<Tile>();
             List<Tile> closedTiles = new List<Tile>();
 
-            PathfinderTileData[,] tileCosts = GetGHCosts(startTile, targetTile, id);
+            PathfinderTileData[,] tileCosts = GetGHCosts(startTile, targetTile);
 
             openTiles.Add(startTile);
 
@@ -66,7 +66,7 @@ namespace IA.Pathfinding
                     int currentTileGCost = tileCosts[currentTile.x, currentTile.y].gCost;
                     int neighbourTileGCost = tileCosts[neighbour.x, neighbour.y].gCost;
 
-                    int newMovementCostToNeighbour = currentTileGCost + Dist(currentTile, neighbour) + neighbour.weight;
+                    int newMovementCostToNeighbour = currentTileGCost + Dist(currentTile, neighbour) + tilesWeights[neighbour.type];
                     if (newMovementCostToNeighbour < neighbourTileGCost || !openTiles.Contains(neighbour))
                     {
                         tileCosts[neighbour.x, neighbour.y].gCost = newMovementCostToNeighbour;
@@ -86,7 +86,6 @@ namespace IA.Pathfinding
 
             while (tile != startTile)
             {
-                Debug.Log(id + ": " + tile.x + " - " + tile.y);
                 path.Add(new Vector2(tile.x, tile.y));
                 tile = tileCosts[tile.x, tile.y].fromTile;
                 
@@ -97,7 +96,7 @@ namespace IA.Pathfinding
             return path;
         }
 
-        private PathfinderTileData[,] GetGHCosts(Tile start, Tile objective, int id)
+        private PathfinderTileData[,] GetGHCosts(Tile start, Tile objective)
         {
             PathfinderTileData[,] tileCosts = new PathfinderTileData[grid.Width, grid.Height];
 

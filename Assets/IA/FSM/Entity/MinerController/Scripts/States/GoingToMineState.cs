@@ -24,7 +24,7 @@ namespace IA.FSM.Entity.MinerController.States
 
             behaviours.Add(() =>
             {
-                Vector3 targetPos = new Vector3(path[indexOfMovement].x, 0, path[indexOfMovement].y);
+                Vector3 targetPos = path[indexOfMovement];
                 Vector3 newPos = position + ((targetPos - position).normalized * speed * deltaTime);
                 onSetPosition.Invoke(newPos);
 

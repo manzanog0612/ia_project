@@ -2,11 +2,11 @@ using System;
 
 using UnityEngine;
 
+using IA.FSM.Entity.MineController;
 using IA.FSM.Entity.MinerController.Constants;
 using IA.FSM.Entity.MinerController.Enums;
 using IA.FSM.Entity.MinerController.States;
-
-using IA.Background.Entity.Home;
+using IA.Game.Entity.UrbanCenterController;
 using IA.Pathfinding;
 
 namespace IA.FSM.Entity.MinerController
@@ -14,8 +14,8 @@ namespace IA.FSM.Entity.MinerController
     public class MinerBehaviour
     {
         #region PRIVATE_FIELDS
-        private MineController.Mine targetMine = null;
-        private Home home = null;
+        private Mine targetMine = null;
+        private UrbanCenter home = null;
 
         private Vector3 position = Vector3.zero;
         private float speed = 8;
@@ -34,7 +34,7 @@ namespace IA.FSM.Entity.MinerController
         #endregion
 
         #region PUBLIC_METHODS
-        public void Init(Pathfinder pathfinder, Vector2Int initiaTile, Home home, Action onLeaveMineralsInHome, Func<int,int,Tile> onGetTile)
+        public void Init(Pathfinder pathfinder, Vector2Int initiaTile, UrbanCenter home, Action onLeaveMineralsInHome, Func<int,int,Tile> onGetTile)
         {
             this.pathfinder = pathfinder;
             this.home = home;
@@ -76,7 +76,7 @@ namespace IA.FSM.Entity.MinerController
 
             fsm.AddState<ReturningToHome>((int)Enums.States.ReturningToHome,
                () => (new object[4] { OnSetPosition, position, speed, deltaTime }),
-               () => (new object[4] { onGetTile.Invoke(targetMine.Tile.x, targetMine.Tile.y), onGetTile.Invoke((int)home.Position.x, (int)home.Position.y), pathfinder, OnLeaveMineralsInHome }));
+               () => (new object[4] { onGetTile.Invoke(targetMine.Tile.x, targetMine.Tile.y), onGetTile.Invoke((int)home.Tile.x, (int)home.Tile.y), pathfinder, OnLeaveMineralsInHome }));
 
             fsm.SetCurrentStateForced((int)Enums.States.Idle);
         }
@@ -91,7 +91,7 @@ namespace IA.FSM.Entity.MinerController
             this.deltaTime = deltaTime;
         }
 
-        public void SetMine(MineController.Mine targetMine)
+        public void SetMine(Mine targetMine)
         {
             this.targetMine = targetMine;
             setNewMine = true;
