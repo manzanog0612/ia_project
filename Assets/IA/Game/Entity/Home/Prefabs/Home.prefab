@@ -144,7 +144,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6338739742741662207}
-  - component: {fileID: 5417539584518978665}
+  - component: {fileID: 3684077742827486789}
   m_Layer: 0
   m_Name: Home
   m_TagString: Untagged
@@ -160,7 +160,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2131045249191428818}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -168,7 +168,7 @@ Transform:
   - {fileID: 5211276124258286801}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5417539584518978665
+--- !u!114 &3684077742827486789
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -177,7 +177,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2131045249191428818}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fc31903850b8c54a921d3a93608d69c, type: 3}
+  m_Script: {fileID: 11500000, guid: 06d7d62ca766a1043b11bd881d325226, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   txtMineralsAmount: {fileID: 9025151349232753803}

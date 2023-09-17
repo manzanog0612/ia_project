@@ -17,7 +17,7 @@ namespace IA.Game.Controller
         [SerializeField] private MinersController minersController = null;
         [SerializeField] private MinesController minesController = null;
 
-        [SerializeField] private GameObject villageCenterPrefab = null;
+        [SerializeField] private GameObject urbanCenterPrefab = null;
 
         [Header("Game Configs")]
         [SerializeField] private int minersAmount = 4;
@@ -33,7 +33,9 @@ namespace IA.Game.Controller
         {
             grid.Init();
 
-            urbanCenter = Instantiate(villageCenterPrefab).GetComponent<UrbanCenter>();
+            Camera.main.transform.position = new Vector3 (grid.Width / 2f, grid.Height / 2f, -10);
+
+            urbanCenter = Instantiate(urbanCenterPrefab).GetComponent<UrbanCenter>();
             urbanCenter.Init(GetRandomTile());
 
             Vector2Int[] minesPositions = GetRandomTiles(minesAmount);
@@ -64,14 +66,14 @@ namespace IA.Game.Controller
             {
                 int iterations = 0;
                 Vector2Int tile;
-
+            
                 do
                 {
                     iterations++;
-                    tile = new Vector2Int(Random.Range(0, grid.Width), Random.Range(0, grid.Height));
+                    tile = new Vector2Int(Random.Range(1, grid.Width - 1), Random.Range(1, grid.Height - 1));
                 }
                 while (tiles.Contains(tile) && iterations < amountRandomTiles);
-
+            
                 tiles.Add(tile);
             }
 

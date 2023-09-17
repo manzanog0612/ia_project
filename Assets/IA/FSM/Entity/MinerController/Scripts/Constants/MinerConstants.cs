@@ -18,8 +18,8 @@ namespace IA.FSM.Entity.MinerController.Constants
             {
                 { TILE_TYPE.DIRT, 1 },
                 { TILE_TYPE.COBBLESTONE, 2 },
-                { TILE_TYPE.SAND, 8 },
-                { TILE_TYPE.WATER, 16 }
+                { TILE_TYPE.SAND, 4 },
+                { TILE_TYPE.WATER, 32 }
             };
         }
     }

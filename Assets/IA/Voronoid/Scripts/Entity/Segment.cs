@@ -32,12 +32,17 @@ namespace IA.Voronoid.Entity
             this.end = end;
             this.isLimit = isLimit;
 
-            mediatrix = new Vector2((origin.x + end.x) / 2, (origin.y + end.y) / 2);
-            direction = Vector2.Perpendicular(new Vector2(end.x - origin.x, end.y - origin.y));
+            mediatrix = (origin + end) / 2;
+            direction = Vector2.Perpendicular(end - origin);
         }
         #endregion
 
         #region PUBLIC_METHODS
+        public void SetMediatrixByPercentage(float percentage)
+        {
+            mediatrix = Vector2.Lerp(origin, end, percentage);
+        }
+
         public void Draw()
         {
             Gizmos.DrawLine(origin, end);

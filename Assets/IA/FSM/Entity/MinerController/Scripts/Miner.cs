@@ -10,6 +10,8 @@ using IA.Voronoid.Generator;
 using TMPro;
 
 using Grid = IA.Pathfinding.Grid;
+using IA.Voronoid.Entity;
+using System.Collections;
 
 namespace IA.FSM.Entity.MinerController
 {
@@ -46,7 +48,7 @@ namespace IA.FSM.Entity.MinerController
 
             pathfinder.Init(grid, tileWeigths);
             minerBehaviour.Init(pathfinder, urbanCenter.Tile, urbanCenter, OnLeaveMineralsInHome, grid.GetTile);
-            voronoidGenerator.Configure(minesPositions, weights);
+            voronoidGenerator.Configure(minesPositions, new Vector2Int(grid.Width, grid.Height), weights);
         }
 
         public void UpdateBehaviour()

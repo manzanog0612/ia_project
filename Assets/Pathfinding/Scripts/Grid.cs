@@ -37,7 +37,7 @@ namespace IA.Pathfinding
             Dictionary<TILE_TYPE, Material> tileTypeMaterials = new Dictionary<TILE_TYPE, Material>()
             {
                 { TILE_TYPE.DIRT, dirtMat },
-                { TILE_TYPE.COBBLESTONE, cobblestoneMat },
+                { TILE_TYPE.COBBLESTONE, cobblestoneMat },            
                 { TILE_TYPE.SAND, sandMat },
                 { TILE_TYPE.WATER, waterMat }
             };
@@ -46,7 +46,7 @@ namespace IA.Pathfinding
             {
                 for (int y = 0; y < height; y++)
                 {
-                    GameObject tileGO = Instantiate(prefabTile, new Vector3(x, 0, y), Quaternion.identity, transform);
+                    GameObject tileGO = Instantiate(prefabTile, new Vector3(x, y, 0), Quaternion.identity, transform);
                     tileGO.gameObject.name = "X:" + x + " Y:" + y;
 
                     Tile tile = new Tile();

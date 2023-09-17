@@ -15,18 +15,18 @@ namespace IA.Voronoid.Entity
         private List<Segment> segments = null;
         private List<Vector2> intersections = null;
         private Vector3[] points = null;
-        private Vector3 position = Vector3.zero;
+        private Vector2Int position = Vector2Int.zero;
         private List<Sector> neighbours = null;
         #endregion
 
         #region PROPERTIES
-        public Vector3 Position => position;
+        public Vector2Int Position => position;
         public List<Vector2> Intersections { get => intersections; }
         public List<Sector> Neighbours { get => neighbours; }
         #endregion
 
         #region CONSTRUCTORS
-        public Sector(Vector2 position)
+        public Sector(Vector2Int position)
         {
             this.position = position;
 
@@ -44,7 +44,7 @@ namespace IA.Voronoid.Entity
             this.neighbours = neighbours;
         }
 
-        public void AddSegmentLimits(List<Limit> limits)
+        public void SetSegmentLimits(List<Limit> limits)
         {
             for (int i = 0; i < limits.Count; i++)
             {
@@ -58,6 +58,11 @@ namespace IA.Voronoid.Entity
         public void AddSegment(Vector2 origin, Vector2 final)
         {
             segments.Add(new Segment(origin, final));
+        }
+
+        public Segment GetSegmentOfSector(Sector neighbourSector)
+        {
+            return segments.Find(s => s.End == neighbourSector.position);
         }
 
         public void DrawSegments()
@@ -83,6 +88,11 @@ namespace IA.Voronoid.Entity
 
             for (int i = 0; i < segments.Count; i++)
             {
+                segments[i].Intersections.Clear();
+            }
+
+            for (int i = 0; i < segments.Count; i++)
+            {
                 for (int j = 0; j < segments.Count; j++)
                 {
                     if (i == j)
@@ -92,7 +102,7 @@ namespace IA.Voronoid.Entity
 
                     Vector2? intersection = GetIntersection(segments[i], segments[j], gridSize);
 
-                    if (!intersection.HasValue)
+                    if (!intersection.HasValue || intersections.Contains(intersection.Value))
                     {
                         continue;
                     }
@@ -133,13 +143,13 @@ namespace IA.Voronoid.Entity
         }
 
         //https://www.youtube.com/watch?v=RSXM9bgqxJM
-        public bool CheckPointInSector(Vector3 point)
+        public bool CheckPointInSector(Vector2 point)
         {
             if (points == null)
             { 
                 return false; 
             }
-
+            
             int edges = 0;
             Vector2 end = points[^1];
             
@@ -149,12 +159,12 @@ namespace IA.Voronoid.Entity
                 end = points[i];
 
                 if ((point.y < start.y) ^ (point.y < end.y) &&
-                     point.x < start.x + ((point.y - start.y) / (end.y - start.y)) * (end.x - start.x))
+                     point.x < start.x + (point.y - start.y) / (end.y - start.y) * (end.x - start.x))
                 {
                     edges++;
                 }
             }
-
+            
             return edges % 2 == 1;
         }
         #endregion
