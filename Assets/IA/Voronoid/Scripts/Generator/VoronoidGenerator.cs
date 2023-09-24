@@ -10,18 +10,16 @@ namespace IA.Voronoid.Generator
     public class VoronoidGenerator
     {
         #region PRIVATE_FIELDS
-        private Vector2Int gridSize = default;
+        private Vector2 gridSize = default;
 
         private List<Limit> limits = null;
         private List<Sector> sectors = new List<Sector>();
         #endregion
 
         #region PUBLIC_METHODS
-        public void Configure(Vector2Int[] points, Vector2Int gridSize, int[,] weigths)
+        public void Configure(Vector2[] points, Vector2 gridSize, int[,] weigths)
         {
             this.gridSize = gridSize;
-            this.gridSize.x -= 1;
-            this.gridSize.y -= 1;
             InitLimits();
 
             sectors.Clear();

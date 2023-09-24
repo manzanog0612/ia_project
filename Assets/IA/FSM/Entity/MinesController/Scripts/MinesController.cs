@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 using IA.FSM.Entity.MineController;
+using System;
 
 namespace IA.FSM.Entity.MinesController
 {
@@ -17,12 +18,12 @@ namespace IA.FSM.Entity.MinesController
         #endregion
 
         #region PUBLIC_METHODS
-        public void Init(Vector2Int[] minesPositions)
+        public void Init(Vector2Int[] minesTiles, Func<Vector2Int, Vector2> onGetTilePos)
         {
-            for (int i = 0; i < minesPositions.Length; i++)
+            for (int i = 0; i < minesTiles.Length; i++)
             {
                 Mine mine = Instantiate(minePrefab, transform).GetComponent<Mine>();
-                mine.Init(minesPositions[i]);
+                mine.Init(minesTiles[i], onGetTilePos.Invoke(minesTiles[i]));
                 mines.Add(mine);
             }
         }

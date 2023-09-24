@@ -1,6 +1,7 @@
 using UnityEngine;
 
 using TMPro;
+using UnityEngine.UIElements;
 
 namespace IA.FSM.Entity.MineController
 {
@@ -17,14 +18,16 @@ namespace IA.FSM.Entity.MineController
         #region PROPERTIES
         public int Minerals { get => minerals; }
         public Vector2Int Tile { get; private set; }
+        public Vector2 Position { get; private set; }
         #endregion
 
         #region PUBLIC_METHODS
-        public void Init(Vector2Int tile)
+        public void Init(Vector2Int tile, Vector2 position)
         {
             minerals = Random.Range(10, 20);
 
-            transform.position = new Vector2(tile.x, tile.y);
+            Position = position;
+            transform.position = position;
             Tile = tile;
         }
 

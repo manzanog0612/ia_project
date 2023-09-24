@@ -7,6 +7,8 @@ using IA.FSM.Entity.MinersController;
 using IA.FSM.Entity.MinesController;
 
 using Grid = IA.Pathfinding.Grid;
+using IA.Pathfinding;
+using System.Linq;
 
 namespace IA.Game.Controller
 {
@@ -37,12 +39,14 @@ namespace IA.Game.Controller
             Camera.main.orthographicSize = grid.RealWidth;
 
             urbanCenter = Instantiate(urbanCenterPrefab).GetComponent<UrbanCenter>();
-            urbanCenter.Init(GetRandomTile());
 
-            Vector2Int[] minesPositions = GetRandomTiles(minesAmount);
+            Vector2Int urbanCenterTile = GetRandomTile();
+            urbanCenter.Init(urbanCenterTile, grid.GetRealPosition(urbanCenterTile));
 
-            minesController.Init(minesPositions);
-            minersController.Init(minersAmount, grid, urbanCenter, minesPositions);
+            Vector2Int[] minesTiles = GetRandomTiles(minesAmount, urbanCenterTile);
+
+            minesController.Init(minesTiles, grid.GetRealPosition);
+            minersController.Init(minersAmount, grid, urbanCenter, minesTiles);
         }
 
         private void Update()
@@ -56,34 +60,33 @@ namespace IA.Game.Controller
         #region PRIVATE_METHODS
         private Vector2Int GetRandomTile()
         {
-            Vector2Int gridPos = new Vector2Int(Random.Range(0, grid.Width), Random.Range(0, grid.Height)); ;
-            return grid.GetRealPosition(gridPos);
+            return new Vector2Int(Random.Range(0, grid.Width), Random.Range(0, grid.Height));
         }
 
-        private Vector2Int[] GetRandomTiles(int amountRandomTiles)
+        private Vector2Int[] GetRandomTiles(int amountRandomTiles, params Vector2Int[] exceptions)
         {
             List<Vector2Int> tiles = new List<Vector2Int>();
 
-            //for (int i = 0; i < amountRandomTiles; i++)
-            //{
-            //    int iterations = 0;
-            //    Vector2Int tile;
-            //
-            //    do
-            //    {
-            //        iterations++;
-            //        tile = GetRandomTile();
-            //    }
-            //    while (tiles.Contains(tile) && iterations < amountRandomTiles);
-            //    
-            //    tiles.Add(tile);
-            //}
+            for (int i = 0; i < amountRandomTiles; i++)
+            {
+                int iterations = 0;
+                Vector2Int tile;
+            
+                do
+                {
+                    iterations++;
+                    tile = GetRandomTile();
+                }
+                while ((tiles.Contains(tile) || exceptions.ToList().Contains(tile)) && iterations < (grid.Width * grid.Height));
+                
+                tiles.Add(tile);
+            }
 
-            tiles.Add(new Vector2Int(1, 1));
-            tiles.Add(new Vector2Int(1, 7));
-            tiles.Add(new Vector2Int(7, 1));
-            tiles.Add(new Vector2Int(7, 7));
-            tiles.Add(new Vector2Int(4, 4));
+            //tiles.Add(new Vector2Int(1, 1));
+            //tiles.Add(new Vector2Int(1, 7));
+            //tiles.Add(new Vector2Int(7, 1));
+            //tiles.Add(new Vector2Int(7, 7));
+            //tiles.Add(new Vector2Int(4, 4));
 
             return tiles.ToArray();
         }

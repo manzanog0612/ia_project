@@ -39,7 +39,7 @@ namespace IA.FSM.Entity.MinerController
             this.pathfinder = pathfinder;
             this.home = home;
 
-            position = new Vector3(initialTile.x, 0, initialTile.y);
+            position = onGetTile.Invoke(initialTile.x, initialTile.y).pos;
 
             fsm = new FSM(Enum.GetValues(typeof(Enums.States)).Length, Enum.GetValues(typeof(Flags)).Length);
 

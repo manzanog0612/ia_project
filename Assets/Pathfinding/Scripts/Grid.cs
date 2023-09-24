@@ -28,8 +28,8 @@ namespace IA.Pathfinding
         #region PROPERTIES
         public int Width { get => width - 2; }
         public int Height { get => height - 2; }
-        public int RealWidth { get => width; }
-        public int RealHeight { get => height; }
+        public float RealWidth { get => grid[width - 1, 0].pos.x; }
+        public float RealHeight { get => grid[0, height - 1].pos.y; }
         #endregion
 
         #region PUBLIC_METHODS
@@ -93,11 +93,11 @@ namespace IA.Pathfinding
             return grid[x + 1, y + 1];
         }
 
-        public Vector2Int GetRealPosition(Vector2Int gridPosition)
+        public Vector2 GetRealPosition(Vector2Int gridPosition)
         {
             Tile tile = GetTile(gridPosition.x, gridPosition.y);
 
-            return new Vector2Int(tile.x, tile.y);
+            return tile.pos;
         }
         #endregion
 

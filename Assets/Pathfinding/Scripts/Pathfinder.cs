@@ -86,9 +86,8 @@ namespace IA.Pathfinding
 
             while (tile != startTile)
             {
-                path.Add(new Vector2(tile.x, tile.y));
-                tile = tileCosts[tile.x, tile.y].fromTile;
-                
+                path.Add(tile.pos);
+                tile = tileCosts[tile.x, tile.y].fromTile;                
             }
 
             path.Reverse();

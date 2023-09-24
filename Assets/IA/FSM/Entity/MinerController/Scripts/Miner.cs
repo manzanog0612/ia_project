@@ -37,7 +37,7 @@ namespace IA.FSM.Entity.MinerController
         #endregion
 
         #region PUBLIC_METHODS
-        public void Init(UrbanCenter urbanCenter, Grid grid, Vector2Int[] minesPositions)
+        public void Init(UrbanCenter urbanCenter, Grid grid, Vector2Int[] minesTiles)
         {
             this.urbanCenter = urbanCenter;
             this.grid = grid;
@@ -48,7 +48,15 @@ namespace IA.FSM.Entity.MinerController
 
             pathfinder.Init(grid, tileWeigths);
             minerBehaviour.Init(pathfinder, urbanCenter.Tile, urbanCenter, OnLeaveMineralsInHome, grid.GetTile);
-            voronoidGenerator.Configure(minesPositions, new Vector2Int(grid.RealWidth, grid.RealHeight), weights);
+
+            List<Vector2> minesPositions = new List<Vector2>();
+
+            for (int i = 0; i < minesTiles.Length; i++)
+            {
+                minesPositions.Add(grid.GetRealPosition(minesTiles[i]));
+            }
+
+            voronoidGenerator.Configure(minesPositions.ToArray(), new Vector2(grid.RealWidth, grid.RealHeight), weights);
         }
 
         public void UpdateBehaviour()

@@ -16,23 +16,23 @@ namespace IA.Voronoid.Entity
         private List<Segment> segments = null;
         private List<Vector2> intersections = null;
         private Vector3[] points = null;
-        private Vector2Int position = Vector2Int.zero;
+        private Vector2 position = Vector2Int.zero;
         private List<Sector> neighbours = null;
         #endregion
 
         #region PROPERTIES
-        public Vector2Int Position => position;
+        public Vector2 Position => position;
         public List<Vector2> Intersections { get => intersections; }
         public List<Sector> Neighbours { get => neighbours; }
         #endregion
 
         #region CONSTRUCTORS
-        public Sector(Vector2Int position)
+        public Sector(Vector2 position)
         {
             this.position = position;
 
             color = Random.ColorHSV();
-            color.a = 0.5f;
+            color.a = 0.2f;
 
             segments = new List<Segment>();
             intersections = new List<Vector2>();
@@ -120,7 +120,7 @@ namespace IA.Voronoid.Entity
             Handles.DrawPolyLine(points);
         }
 
-        public void SetIntersections(Vector2Int gridSize)
+        public void SetIntersections(Vector2 gridSize)
         {
             intersections.Clear();
 
@@ -212,7 +212,7 @@ namespace IA.Voronoid.Entity
         #endregion
 
         #region PRIVATE_METHODS
-        public Vector2? GetIntersection(Segment seg1, Segment seg2, Vector2Int gridSize)
+        public Vector2? GetIntersection(Segment seg1, Segment seg2, Vector2 gridSize)
         {
             Vector2 intersection = Vector2.zero;
         

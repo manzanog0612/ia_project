@@ -16,12 +16,15 @@ namespace IA.Game.Entity.UrbanCenterController
 
         #region PROPERTIES
         public Vector2Int Tile { get; private set; }
+        public Vector2 Position { get; private set; }
         #endregion
 
         #region PUBLIC_METHODS
-        public void Init(Vector2Int tile)
+        public void Init(Vector2Int tile, Vector2 position)
         {
             Tile = tile;
+            Position = position;
+            transform.position = position;  
         }
 
         public void UpdateText()
