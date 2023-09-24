@@ -34,12 +34,12 @@ namespace IA.FSM.Entity.MinerController
         #endregion
 
         #region PUBLIC_METHODS
-        public void Init(Pathfinder pathfinder, Vector2Int initiaTile, UrbanCenter home, Action onLeaveMineralsInHome, Func<int,int,Tile> onGetTile)
+        public void Init(Pathfinder pathfinder, Vector2Int initialTile, UrbanCenter home, Action onLeaveMineralsInHome, Func<int,int,Tile> onGetTile)
         {
             this.pathfinder = pathfinder;
             this.home = home;
 
-            position = new Vector3(initiaTile.x, 0, initiaTile.y);
+            position = new Vector3(initialTile.x, 0, initialTile.y);
 
             fsm = new FSM(Enum.GetValues(typeof(Enums.States)).Length, Enum.GetValues(typeof(Flags)).Length);
 
@@ -68,7 +68,7 @@ namespace IA.FSM.Entity.MinerController
 
             fsm.AddState<GoingToMineState>((int)Enums.States.GoingToMine,
                () => (new object[4] { OnSetPosition, position, speed, deltaTime }),
-               () => (new object[3] { onGetTile.Invoke(initiaTile.x, initiaTile.y), onGetTile.Invoke(targetMine.Tile.x, targetMine.Tile.y), pathfinder }));
+               () => (new object[3] { onGetTile.Invoke(initialTile.x, initialTile.y), onGetTile.Invoke(targetMine.Tile.x, targetMine.Tile.y), pathfinder }));
 
             fsm.AddState<MiningState>((int)Enums.States.Mining,
                () => (new object[4] { targetMine, inventory, OnMine, deltaTime }),
@@ -76,7 +76,7 @@ namespace IA.FSM.Entity.MinerController
 
             fsm.AddState<ReturningToHome>((int)Enums.States.ReturningToHome,
                () => (new object[4] { OnSetPosition, position, speed, deltaTime }),
-               () => (new object[4] { onGetTile.Invoke(targetMine.Tile.x, targetMine.Tile.y), onGetTile.Invoke((int)home.Tile.x, (int)home.Tile.y), pathfinder, OnLeaveMineralsInHome }));
+               () => (new object[4] { onGetTile.Invoke(targetMine.Tile.x, targetMine.Tile.y), onGetTile.Invoke(home.Tile.x, home.Tile.y), pathfinder, OnLeaveMineralsInHome }));
 
             fsm.SetCurrentStateForced((int)Enums.States.Idle);
         }

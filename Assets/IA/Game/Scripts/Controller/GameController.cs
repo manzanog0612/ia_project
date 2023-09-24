@@ -33,7 +33,8 @@ namespace IA.Game.Controller
         {
             grid.Init();
 
-            Camera.main.transform.position = new Vector3 (grid.Width / 2f, grid.Height / 2f, -10);
+            Camera.main.transform.position = new Vector3 (grid.RealWidth / 2f, grid.RealHeight / 2f, -10);
+            Camera.main.orthographicSize = grid.RealWidth;
 
             urbanCenter = Instantiate(urbanCenterPrefab).GetComponent<UrbanCenter>();
             urbanCenter.Init(GetRandomTile());
@@ -55,27 +56,34 @@ namespace IA.Game.Controller
         #region PRIVATE_METHODS
         private Vector2Int GetRandomTile()
         {
-            return new Vector2Int(Random.Range(0, grid.Width), Random.Range(0, grid.Height));
+            Vector2Int gridPos = new Vector2Int(Random.Range(0, grid.Width), Random.Range(0, grid.Height)); ;
+            return grid.GetRealPosition(gridPos);
         }
 
         private Vector2Int[] GetRandomTiles(int amountRandomTiles)
         {
             List<Vector2Int> tiles = new List<Vector2Int>();
 
-            for (int i = 0; i < amountRandomTiles; i++)
-            {
-                int iterations = 0;
-                Vector2Int tile;
-            
-                do
-                {
-                    iterations++;
-                    tile = new Vector2Int(Random.Range(1, grid.Width - 1), Random.Range(1, grid.Height - 1));
-                }
-                while (tiles.Contains(tile) && iterations < amountRandomTiles);
-            
-                tiles.Add(tile);
-            }
+            //for (int i = 0; i < amountRandomTiles; i++)
+            //{
+            //    int iterations = 0;
+            //    Vector2Int tile;
+            //
+            //    do
+            //    {
+            //        iterations++;
+            //        tile = GetRandomTile();
+            //    }
+            //    while (tiles.Contains(tile) && iterations < amountRandomTiles);
+            //    
+            //    tiles.Add(tile);
+            //}
+
+            tiles.Add(new Vector2Int(1, 1));
+            tiles.Add(new Vector2Int(1, 7));
+            tiles.Add(new Vector2Int(7, 1));
+            tiles.Add(new Vector2Int(7, 7));
+            tiles.Add(new Vector2Int(4, 4));
 
             return tiles.ToArray();
         }

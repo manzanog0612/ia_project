@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using UnityEditor;
@@ -31,7 +32,7 @@ namespace IA.Voronoid.Entity
             this.position = position;
 
             color = Random.ColorHSV();
-            color.a = 0.35f;
+            color.a = 0.5f;
 
             segments = new List<Segment>();
             intersections = new List<Vector2>();
@@ -51,32 +52,69 @@ namespace IA.Voronoid.Entity
                 Vector2 origin = position;
                 Vector2 final = limits[i].GetOutsitePosition(origin);
 
-                segments.Add(new Segment(origin, final, true));
+                if (segments.Find(s => s.Origin == origin && s.End == final) == null)
+                { 
+                    segments.Add(new Segment(origin, final, true)); 
+                }
             }
         }
 
         public void AddSegment(Vector2 origin, Vector2 final)
         {
-            segments.Add(new Segment(origin, final));
+            if (segments.Find(s => s.End == final) == null)
+            {
+                segments.Add(new Segment(origin, final));
+            }
         }
+
+       //public void AddSegment(Vector2 origin, Vector2 final, Vector2 mediatrix)
+       //{
+       //    if (segments.Find(s => s.End == final) == null)
+       //    { 
+       //        segments.Add(new Segment(origin, final, mediatrix)); 
+       //    }
+       //}
 
         public Segment GetSegmentOfSector(Sector neighbourSector)
         {
             return segments.Find(s => s.End == neighbourSector.position);
         }
 
-        public void DrawSegments()
+        public void SetAllSegmentsMatrices(float percentage)
         {
             for (int i = 0; i < segments.Count; i++)
             {
-                segments[i].Draw();
+                if (segments[i].IsLimit)
+                {
+                    continue;
+                }
+
+                segments[i].SetMediatrixByPercentage(percentage);
             }
+        }
+
+        public void DrawSegments()
+        {
+            //for (int i = 0; i < segments.Count; i++)
+            //{
+            //    segments[i].Draw();
+            //}
         }
 
         public void DrawSector()
         {
+            Gizmos.color = color;
+            Gizmos.DrawSphere(new Vector3(position.x, position.y, -1), 0.5f);
+
             Handles.color = color;
             Handles.DrawAAConvexPolygon(points);
+
+            //for (int i = 0; i < points.Length; i++)
+            //{ 
+            //    Gizmos.color = color;
+            //    Gizmos.DrawSphere(points[i], 0.5f);
+            //}
+            
 
             Handles.color = Color.black;
             Handles.DrawPolyLine(points);
@@ -100,14 +138,18 @@ namespace IA.Voronoid.Entity
                         continue;
                     }
 
-                    Vector2? intersection = GetIntersection(segments[i], segments[j], gridSize);
+                    Segment segment1 = segments[i];
+                    Segment segment2 = segments[j];
 
-                    if (!intersection.HasValue || intersections.Contains(intersection.Value))
+                    Vector2 ? intersection = GetIntersection(segment1, segment2, gridSize);
+
+                    if (!intersection.HasValue || intersections.Contains(intersection.Value) || 
+                        float.IsInfinity(Math.Abs(intersection.Value.x)) || float.IsInfinity(Math.Abs(intersection.Value.y)))
                     {
                         continue;
                     }
 
-                    float maxDistance = Vector2.Distance(intersection.Value, segments[i].Origin);
+                    float maxDistance = Vector2.Distance(intersection.Value, segment1.Origin);
 
                     // This check is because if any of the points that aren't in the calculation (the points of the segments, origin and end)
                     // are closer to any of the other points it means that there is a closer intersection that has been calculated yet or it
@@ -130,8 +172,8 @@ namespace IA.Voronoid.Entity
                     if (checkValidIntersection)
                     {
                         intersections.Add(intersection.Value);
-                        segments[i].Intersections.Add(intersection.Value);
-                        segments[j].Intersections.Add(intersection.Value);
+                        segment1.Intersections.Add(intersection.Value);
+                        segment2.Intersections.Add(intersection.Value);
                     }
                 }
             }
@@ -237,8 +279,8 @@ namespace IA.Voronoid.Entity
             {
                 Vector2 pos = intersectionPoints[i].Position;
                 Vector2 pointDirVector = pos - center;
-                //                                   __________
-                //                            x / -l/ px² + py²
+                //                                                __________
+                //                                         x / -l/ px² + py²
                 intersectionPoints[i].Angle = Mathf.Acos(pointDirVector.x / Mathf.Sqrt(Mathf.Pow(pointDirVector.x, 2f) + Mathf.Pow(pointDirVector.y, 2f)));
 
                 if (pos.y > center.y)

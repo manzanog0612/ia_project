@@ -20,7 +20,8 @@ namespace IA.Voronoid.Generator
         public void Configure(Vector2Int[] points, Vector2Int gridSize, int[,] weigths)
         {
             this.gridSize = gridSize;
-
+            this.gridSize.x -= 1;
+            this.gridSize.y -= 1;
             InitLimits();
 
             sectors.Clear();
@@ -50,7 +51,7 @@ namespace IA.Voronoid.Generator
             }
 
             SetSectorsNeighbours();
-            SetSectorsWeights(weigths);
+            //SetSectorsWeights(weigths);
         }
 
         public void Draw()
@@ -74,9 +75,9 @@ namespace IA.Voronoid.Generator
             limits = new List<Limit>
             {
                 new Limit(Vector2.zero, DIRECTION.LEFT),
-                new Limit(new Vector2(0, gridSize.y - 1), DIRECTION.UP),
-                new Limit(new Vector2(gridSize.x - 1, gridSize.y - 1), DIRECTION.RIGHT),
-                new Limit(new Vector2(gridSize.x - 1, 0), DIRECTION.DOWN)
+                new Limit(new Vector2(0, gridSize.y), DIRECTION.UP),
+                new Limit(new Vector2(gridSize.x, gridSize.y), DIRECTION.RIGHT),
+                new Limit(new Vector2(gridSize.x, 0), DIRECTION.DOWN)
             };
         }
 
@@ -136,6 +137,54 @@ namespace IA.Voronoid.Generator
         
         private void SetSectorsWeights(int[,] weigths)
         {
+            const int amountOfIterations = 1;            
+            for (int iterations = 0; iterations < amountOfIterations; iterations++)
+            {
+                for (int i = 0; i < sectors.Count; i++)
+                {
+                    List<Sector> neighbours = sectors[i].Neighbours;
+                    Sector sector = sectors[i]; 
+
+                    for (int j = 0; j < 1; j++)
+                    {
+                        Sector neighbour = neighbours[j];
+
+                        int sectorWeigth = GetTotalWeightOnSector(sector, weigths);
+                        int neighbourWeigth = GetTotalWeightOnSector(neighbour, weigths);
+
+                        float sectorWeightPercentage = sectorWeigth / (float)(sectorWeigth + neighbourWeigth);
+
+                        BalanceSector(sector, neighbour, 1 - sectorWeightPercentage);
+
+                        for (int k = 0; k < neighbours.Count; k++)
+                        {
+                            BalanceSector(neighbours[k], sector, sectorWeightPercentage);
+                        }
+
+                        for (int k = 0; k < sectors.Count; k++)
+                        {
+                            sectors[k].SetSegmentLimits(limits);
+
+                            //for (int l = 0; l < sectors.Count; l++)
+                            //{
+                            //    if (k == l)
+                            //    {
+                            //        continue;
+                            //    }
+                            //
+                            //    sectors[k].AddSegment(sectors[k].Position, sectors[l].Position);
+                            //}
+
+                            sectors[k].SetIntersections(gridSize);
+                        }
+                    }
+                }
+            }
+        }
+
+        /*
+         private void SetSectorsWeights(int[,] weigths)
+        {
             const int amountOfIterations = 7;            
             for (int iterations = 0; iterations < amountOfIterations; iterations++)
             {
@@ -143,11 +192,6 @@ namespace IA.Voronoid.Generator
                 {
                     for (int j = 0; j < sectors[i].Neighbours.Count; j++)
                     {
-                        if (i == j)
-                        {
-                            continue;
-                        }
-
                         Sector sector = sectors[i];
                         Sector neighbour = sectors[i].Neighbours[j];
 
@@ -162,14 +206,13 @@ namespace IA.Voronoid.Generator
                     }
                 }
 
-                //for (int i = 0; i < sectors.Count; i++)
-                //{
-                //    sectors[i].Neighbours.Clear();
-                //}
-                //
-                //SetSectorsNeighbours();
+                for (int i = 0; i < sectors.Count; i++)
+                {
+                    sectors[i].SetIntersections(gridSize);
+                }
             }
         }
+         */
 
         private void BalanceSector(Sector sector, Sector neighbour, float sectorWeightPercentage)
         {
@@ -180,8 +223,19 @@ namespace IA.Voronoid.Generator
                 return;
             }
 
+            sector.SetAllSegmentsMatrices(sectorWeightPercentage);
+        }
+
+        private void BalanceNeighbour(Sector sector, Sector neighbour, float sectorWeightPercentage)
+        {
+            Segment sectorSegment = sector.GetSegmentOfSector(neighbour);
+
+            if (sectorSegment == null)
+            {
+                return;
+            }
+
             sectorSegment.SetMediatrixByPercentage(sectorWeightPercentage);
-            sector.SetIntersections(gridSize);
         }
         #endregion
     }

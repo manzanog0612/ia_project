@@ -72,14 +72,15 @@ namespace IA.FSM.Entity.MinersController
 
         public void UpdateBehaviours()
         {
-            Parallel.ForEach(minersFsm,
-                miner =>
-                {
-                    miner.MinerBehaviour.UpdateFsm();
-                });
+            //Parallel.ForEach(minersFsm,
+            //    miner =>
+            //    {
+            //        miner.MinerBehaviour.UpdateFsm();
+            //    });
 
             for (int i = 0; i < minersFsm.Count; i++)
             {
+                miners[i].MinerBehaviour.UpdateFsm();
                 miners[i].UpdateBehaviour();
             }
 

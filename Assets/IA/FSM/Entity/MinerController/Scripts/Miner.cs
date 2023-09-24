@@ -48,7 +48,7 @@ namespace IA.FSM.Entity.MinerController
 
             pathfinder.Init(grid, tileWeigths);
             minerBehaviour.Init(pathfinder, urbanCenter.Tile, urbanCenter, OnLeaveMineralsInHome, grid.GetTile);
-            voronoidGenerator.Configure(minesPositions, new Vector2Int(grid.Width, grid.Height), weights);
+            voronoidGenerator.Configure(minesPositions, new Vector2Int(grid.RealWidth, grid.RealHeight), weights);
         }
 
         public void UpdateBehaviour()
