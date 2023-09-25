@@ -46,7 +46,7 @@ namespace IA.Game.Controller
             Vector2Int[] minesTiles = GetRandomTiles(minesAmount, urbanCenterTile);
 
             minesController.Init(minesTiles, grid.GetRealPosition);
-            minersController.Init(minersAmount, grid, urbanCenter, minesTiles);
+            minersController.Init(minersAmount, grid, urbanCenter, minesTiles, minesController.GetMineOnPos);
         }
 
         private void Update()
@@ -66,7 +66,7 @@ namespace IA.Game.Controller
         private Vector2Int[] GetRandomTiles(int amountRandomTiles, params Vector2Int[] exceptions)
         {
             List<Vector2Int> tiles = new List<Vector2Int>();
-
+            
             for (int i = 0; i < amountRandomTiles; i++)
             {
                 int iterations = 0;
@@ -82,7 +82,7 @@ namespace IA.Game.Controller
                 tiles.Add(tile);
             }
 
-            //tiles.Add(new Vector2Int(1, 1));
+            //tiles.Add(new Vector2Int(1, 8));
             //tiles.Add(new Vector2Int(1, 7));
             //tiles.Add(new Vector2Int(7, 1));
             //tiles.Add(new Vector2Int(7, 7));

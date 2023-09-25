@@ -28,6 +28,11 @@ namespace IA.FSM.Entity.MinesController
             }
         }
 
+        public Mine GetMineOnPos(Vector2 position)
+        {
+            return mines.Find(m => m.Position == position);
+        }
+
         public void UpdateMines()
         {
             for (int i = 0; i < mines.Count; i++)

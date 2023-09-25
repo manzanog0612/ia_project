@@ -7,22 +7,22 @@ using IA.FSM.Entity.MinerController.Enums;
 
 namespace IA.FSM.Entity.MinerController.States
 {
-    public class IdleState : State
+    public class HungryState : State
     {
         public override List<Action> GetBehaviours(params object[] parameters)
         {
-            bool setNewMine = (bool)parameters[0];
+            int foodLeft = (int)parameters[0];
 
             List<Action> behaviours = new List<Action>();
 
             behaviours.Add(() =>
             {
-                if (setNewMine)
+                if (foodLeft > 0)
                 {
-                    Transition((int)Flags.OnSetMine);
+                    Transition((int)Flags.OnReceivedFood);
                 }
             });
-            behaviours.Add(() => Debug.Log("IDLE"));
+            behaviours.Add(() => Debug.Log("HUNGRY"));
 
             return behaviours;
         }
@@ -30,19 +30,12 @@ namespace IA.FSM.Entity.MinerController.States
         public override List<Action> GetOnEnterBehaviours(params object[] parameters)
         {
             List<Action> enterBehaviours = new List<Action>();
-
             return enterBehaviours;
         }
 
         public override List<Action> GetOnExitBehaviours(params object[] parameters)
         {
             List<Action> exitBehaviours = new List<Action>();
-
-            exitBehaviours.Add(() => 
-            {
-                (parameters[0] as Action).Invoke();
-            });
-
             return exitBehaviours;
         }
     }

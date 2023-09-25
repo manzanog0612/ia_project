@@ -2,9 +2,10 @@ namespace IA.FSM.Entity.MinerController.Enums
 {
     enum States
     {
-        Idle,
+        SearchingCloserMine,
         GoingToMine,
         Mining,
+        WaitingForFood,
         ReturningToHome
     }
 
@@ -12,6 +13,8 @@ namespace IA.FSM.Entity.MinerController.Enums
     {
         OnSetMine,
         OnReachMine,
+        OnHungry,
+        OnReceivedFood,
         OnFullInventory,
         OnEmptyMine,
         OnReachHome

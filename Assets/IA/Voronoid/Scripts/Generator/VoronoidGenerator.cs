@@ -52,6 +52,19 @@ namespace IA.Voronoid.Generator
             //SetSectorsWeights(weigths);
         }
 
+        public Vector2 GetSectorCloserToPosition(Vector2 position)
+        {
+            for (int i = 0; i < sectors.Count; i++)
+            {
+                if (sectors[i].CheckPointInSector(position))
+                {
+                    return sectors[i].Position;
+                }
+            }
+
+            return Vector2.zero;
+        }
+
         public void Draw()
         {
             if (sectors == null)

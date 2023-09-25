@@ -21,6 +21,7 @@ namespace IA.FSM.Entity.MinerController.States
             int inventory = (int)parameters[1];
             Action onMine = parameters[2] as Action;
             float deltaTime = (float)parameters[3];
+            int foodLeft = (int)parameters[4];
 
             List<Action> behaviours = new List<Action>();
 
@@ -35,7 +36,12 @@ namespace IA.FSM.Entity.MinerController.States
                 {
                     Transition((int)Flags.OnFullInventory);
                 }
-                else                
+                else 
+                if (foodLeft == 0)
+                {
+                    Transition((int)Flags.OnHungry);
+                }
+                else
                 {
                     miningTimer += deltaTime;
 

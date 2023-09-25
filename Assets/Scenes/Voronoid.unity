@@ -208,7 +208,7 @@ MonoBehaviour:
   minesController: {fileID: 1235546301}
   urbanCenterPrefab: {fileID: 2131045249191428818, guid: c9d339a7d90e9894e8b70a56cc9a496d, type: 3}
   minersAmount: 1
-  minesAmount: 5
+  minesAmount: 1
 --- !u!4 &468733680
 Transform:
   m_ObjectHideFlags: 0
@@ -394,6 +394,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 9
   height: 9
+  distanceBetweenNodes: 0
   prefabTile: {fileID: 1282586454334708566, guid: bfb3da36248c08c46920be0d63e8d816, type: 3}
   dirtMat: {fileID: 2100000, guid: f627d5bf2836e3e47b409c99feecbebc, type: 2}
   cobblestoneMat: {fileID: 2100000, guid: b78eda79a98f39642a85b2d16ecc609b, type: 2}

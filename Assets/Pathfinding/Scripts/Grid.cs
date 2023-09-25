@@ -66,10 +66,12 @@ namespace IA.Pathfinding
                     if (y == 0 || y == height - 1 || x == 0 || x == width - 1)
                     {
                         tile.type = TILE_TYPE.LIMIT;
+                        tile.walkable = false;
                     }
                     else
                     {
                         tile.type = (TILE_TYPE)UnityEngine.Random.Range(0, Enum.GetValues(typeof(TILE_TYPE)).Length - 1);
+                        tile.walkable = true;
                     }
                     
                     tileGO.GetComponent<MeshRenderer>().material = tileTypeMaterials[tile.type];
@@ -98,6 +100,28 @@ namespace IA.Pathfinding
             Tile tile = GetTile(gridPosition.x, gridPosition.y);
 
             return tile.pos;
+        }
+
+        public Tile GetCloserTileToPosition(Vector2 position)
+        {
+            Tile closerTile = null;
+            float closerDist = float.MaxValue;
+
+            for (int x = 1; x < width - 2; x++)
+            {
+                for (int y = 1; y < height - 2; y++)
+                {
+                    float dist = Vector2.Distance(grid[x, y].pos, position);
+                    
+                    if (dist < closerDist)
+                    {
+                        closerTile = grid[x, y];
+                        closerDist = dist;
+                    }
+                }
+            }
+
+            return closerTile;
         }
         #endregion
 

@@ -37,7 +37,7 @@ namespace IA.FSM.Entity.MinersController
         #endregion
 
         #region PUBLIC_METHODS
-        public void Init(int minersAmount, Grid grid, UrbanCenter urbanCenter, Vector2Int[] minesTiles)
+        public void Init(int minersAmount, Grid grid, UrbanCenter urbanCenter, Vector2Int[] minesTiles, Func<Vector2, Mine> onGetMineOnPos)
         {
             fsm = new FSM(Enum.GetValues(typeof(Enums.States)).Length, Enum.GetValues(typeof(Flags)).Length);
 
@@ -65,7 +65,7 @@ namespace IA.FSM.Entity.MinersController
             for (int i = 0; i < miners.Length; i++)
             {
                 miners[i] = Instantiate(minerPrefab, minersHolder).GetComponent<Miner>();
-                miners[i].Init(urbanCenter, grid, minesTiles);
+                miners[i].Init(urbanCenter, grid, minesTiles, onGetMineOnPos);
                 minersFsm.Add(miners[i]);
             }
         }

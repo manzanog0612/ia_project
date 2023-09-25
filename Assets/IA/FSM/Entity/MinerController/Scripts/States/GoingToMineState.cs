@@ -16,7 +16,7 @@ namespace IA.FSM.Entity.MinerController.States
         public override List<Action> GetBehaviours(params object[] parameters)
         {
             Action<Vector3> onSetPosition = parameters[0] as Action<Vector3>;
-            Vector3 position = (Vector3)parameters[1];
+            Vector2 position = (Vector2)parameters[1];
             float speed = (float)parameters[2];
             float deltaTime = (float)parameters[3];
 
@@ -24,11 +24,11 @@ namespace IA.FSM.Entity.MinerController.States
 
             behaviours.Add(() =>
             {
-                Vector3 targetPos = path[indexOfMovement];
-                Vector3 newPos = position + ((targetPos - position).normalized * speed * deltaTime);
+                Vector2 targetPos = path[indexOfMovement];
+                Vector2 newPos = position + ((targetPos - position).normalized * speed * deltaTime);
                 onSetPosition.Invoke(newPos);
 
-                if (Vector3.Distance(newPos, targetPos) < 0.01f)
+                if (Vector2.Distance(newPos, targetPos) < 0.01f)
                 {
                     indexOfMovement++;
 

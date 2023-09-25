@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
 
+using IA.FSM.Entity.MineController;
 using IA.FSM.Entity.MinerController.Constants;
 using IA.Game.Entity.UrbanCenterController;
 using IA.Pathfinding;
@@ -10,8 +12,7 @@ using IA.Voronoid.Generator;
 using TMPro;
 
 using Grid = IA.Pathfinding.Grid;
-using IA.Voronoid.Entity;
-using System.Collections;
+
 
 namespace IA.FSM.Entity.MinerController
 {
@@ -37,17 +38,18 @@ namespace IA.FSM.Entity.MinerController
         #endregion
 
         #region PUBLIC_METHODS
-        public void Init(UrbanCenter urbanCenter, Grid grid, Vector2Int[] minesTiles)
+        public void Init(UrbanCenter urbanCenter, Grid grid, Vector2Int[] minesTiles, Func<Vector2, Mine> onGetMineOnPos)
         {
             this.urbanCenter = urbanCenter;
             this.grid = grid;
 
             Dictionary<TILE_TYPE, int> tileWeigths = MinerConstants.GetTileWeigths();
+            Dictionary<TILE_TYPE, bool> tilesWalkableState = MinerConstants.GetTilesWalkableState();
 
             CalculateTilesWeights(tileWeigths);
 
-            pathfinder.Init(grid, tileWeigths);
-            minerBehaviour.Init(pathfinder, urbanCenter.Tile, urbanCenter, OnLeaveMineralsInHome, grid.GetTile);
+            pathfinder.Init(grid, tileWeigths, tilesWalkableState);
+            minerBehaviour.Init(pathfinder, urbanCenter.Tile, voronoidGenerator, urbanCenter, OnLeaveMineralsInHome, grid.GetTile, onGetMineOnPos, grid.GetCloserTileToPosition);
 
             List<Vector2> minesPositions = new List<Vector2>();
 
