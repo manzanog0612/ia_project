@@ -16,5 +16,32 @@ namespace IA.FSM.Entity.CarrouseController.Constants
                 { TILE_TYPE.WATER, 32 }
             };
         }
+
+        public static Dictionary<TILE_TYPE, bool> GetTilesWalkableState()
+        {
+            return new()
+            {
+                { TILE_TYPE.DIRT, true },
+                { TILE_TYPE.COBBLESTONE, true },
+                { TILE_TYPE.SAND, false },
+                { TILE_TYPE.WATER, true }
+            };
+        }
+
+        public static List<TILE_TYPE> GetWalkableTiles()
+        {
+            List<TILE_TYPE> walkableTiles = new List<TILE_TYPE>();
+            Dictionary<TILE_TYPE, bool> tilesWalkableState = GetTilesWalkableState();
+
+            foreach (KeyValuePair<TILE_TYPE, bool> tileState in tilesWalkableState)
+            {
+                if (tileState.Value)
+                {
+                    walkableTiles.Add(tileState.Key);
+                }
+            }
+
+            return walkableTiles;
+        }
     }
 }

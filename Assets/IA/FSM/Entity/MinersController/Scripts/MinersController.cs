@@ -65,7 +65,8 @@ namespace IA.FSM.Entity.MinersController
             for (int i = 0; i < miners.Length; i++)
             {
                 miners[i] = Instantiate(minerPrefab, minersHolder).GetComponent<Miner>();
-                miners[i].Init(urbanCenter, grid, onGetMineOnPos, onGetAllMinesLeft);
+                miners[i].Init(urbanCenter, grid);
+                miners[i].InitBehaviour(onGetMineOnPos, onGetAllMinesLeft);
                 minersFsm.Add(miners[i]);
             }
         }

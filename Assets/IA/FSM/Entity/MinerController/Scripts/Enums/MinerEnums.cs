@@ -6,7 +6,8 @@ namespace IA.FSM.Entity.MinerController.Enums
         GoingToMine,
         Mining,
         WaitingForFood,
-        ReturningToHome
+        ReturningToHome,
+        Idle
     }
 
     enum Flags
@@ -17,6 +18,8 @@ namespace IA.FSM.Entity.MinerController.Enums
         OnReceivedFood,
         OnFullInventory,
         OnEmptyMine,
-        OnReachHome
+        OnReachHome,
+        OnNoMinesFound,
+        OnFinishJob
     }
 }

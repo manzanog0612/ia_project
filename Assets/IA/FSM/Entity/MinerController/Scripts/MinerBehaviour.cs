@@ -26,12 +26,14 @@ namespace IA.FSM.Entity.MinerController
 
         private Vector2 position = Vector3.zero;
         private int inventory = 0;
-        private int foodsLeft = 20;
+        private int foodsLeft = 22;
 
         private FSM fsm;
         private Pathfinder pathfinder = null;
         private VoronoidGenerator voronoidGenerator = null;
         private Grid grid = null;
+
+        private bool outOfMines = false;
 
         private int[,] weights = null;
 
@@ -64,6 +66,7 @@ namespace IA.FSM.Entity.MinerController
             fsm = new FSM(Enum.GetValues(typeof(Enums.States)).Length, Enum.GetValues(typeof(Flags)).Length);
 
             fsm.SetRelation((int)Enums.States.SearchingCloserMine, (int)Flags.OnSetMine, (int)Enums.States.GoingToMine);
+            fsm.SetRelation((int)Enums.States.SearchingCloserMine, (int)Flags.OnNoMinesFound, (int)Enums.States.ReturningToHome);
 
             fsm.SetRelation((int)Enums.States.GoingToMine, (int)Flags.OnReachMine, (int)Enums.States.Mining);
 
@@ -75,6 +78,7 @@ namespace IA.FSM.Entity.MinerController
             fsm.SetRelation((int)Enums.States.WaitingForFood, (int)Flags.OnReceivedFood, (int)Enums.States.Mining);
 
             fsm.SetRelation((int)Enums.States.ReturningToHome, (int)Flags.OnReachHome, (int)Enums.States.SearchingCloserMine);
+            fsm.SetRelation((int)Enums.States.ReturningToHome, (int)Flags.OnFinishJob, (int)Enums.States.Idle);
 
             Action<Mine> onSetTargetMine = SetMine;
             Action OnMine = Mine;
@@ -84,10 +88,10 @@ namespace IA.FSM.Entity.MinerController
                 onLeaveMineralsInHome.Invoke();
                 inventory = 0;
             };
-            Action onIntializeVoronoi = InitializeNewVoronoi;
+            Func<bool> onUpdateMap = UpdateMap;
 
             fsm.AddState<SearchingCloserMineState>((int)Enums.States.SearchingCloserMine,
-                () => (new object[5] { position, voronoidGenerator, onGetMineOnPos, onSetTargetMine, onIntializeVoronoi }));
+                () => (new object[5] { position, voronoidGenerator, onGetMineOnPos, onSetTargetMine, onUpdateMap }));
 
             fsm.AddState<GoingToMineState>((int)Enums.States.GoingToMine,
                () => (new object[4] { OnSetPosition, position, MinerConstants.moveSpeed, deltaTime }),
@@ -101,8 +105,10 @@ namespace IA.FSM.Entity.MinerController
                () => (new object[1] { foodsLeft }));
 
             fsm.AddState<ReturningToHome>((int)Enums.States.ReturningToHome,
-               () => (new object[4] { OnSetPosition, position, MinerConstants.moveSpeed, deltaTime }),
+               () => (new object[5] { OnSetPosition, position, MinerConstants.moveSpeed, deltaTime, outOfMines }),
                () => (new object[4] { grid.GetTile(targetMine.Tile.x, targetMine.Tile.y), grid.GetTile(urbanCenter.Tile.x, urbanCenter.Tile.y), pathfinder, OnLeaveMineralsInHome }));
+
+            fsm.AddState<IdleState>((int)Enums.States.Idle, () => (new object[1] { 0 }));
 
             fsm.SetCurrentStateForced((int)Enums.States.SearchingCloserMine);
         }
@@ -129,9 +135,18 @@ namespace IA.FSM.Entity.MinerController
         #endregion
 
         #region PRIVATE_METHODS
-        private void InitializeNewVoronoi()
+        private bool UpdateMap()
         {
-            voronoidGenerator.Configure(GetMinesPositions(), new Vector2(grid.RealWidth, grid.RealHeight), weights);
+            Vector2[] minesPositions = GetMinesPositions();
+
+            if (minesPositions.Length == 0)
+            {
+                outOfMines = true;
+                return false;
+            }
+
+            voronoidGenerator.Configure(minesPositions, new Vector2(grid.RealWidth, grid.RealHeight), weights);
+            return true;
         }
 
         private Vector2[] GetMinesPositions()

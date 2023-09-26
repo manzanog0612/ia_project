@@ -20,6 +20,7 @@ namespace IA.FSM.Entity.MinerController.States
             Vector2 position = (Vector2)parameters[1];
             float speed = (float)parameters[2];
             float deltaTime = (float)parameters[3];
+            bool outOfMines = (bool)parameters[4];
 
             List<Action> behaviours = new List<Action>();
 
@@ -36,7 +37,15 @@ namespace IA.FSM.Entity.MinerController.States
                     if (indexOfMovement == path.Count)
                     {
                         onReachHome.Invoke();
-                        Transition((int)Flags.OnReachHome);
+
+                        if (outOfMines)
+                        {
+                            Transition((int)Flags.OnFinishJob);
+                        }
+                        else
+                        {
+                            Transition((int)Flags.OnReachHome);
+                        }
                     }
                 }
             });

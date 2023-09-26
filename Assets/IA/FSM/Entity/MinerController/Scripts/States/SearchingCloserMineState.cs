@@ -6,7 +6,6 @@ using UnityEngine;
 using IA.FSM.Entity.MineController;
 using IA.FSM.Entity.MinerController.Enums;
 using IA.Voronoid.Generator;
-using IA.Pathfinding;
 
 namespace IA.FSM.Entity.MinerController.States
 {
@@ -18,19 +17,24 @@ namespace IA.FSM.Entity.MinerController.States
             VoronoidGenerator voronoidGenerator = (VoronoidGenerator)parameters[1];
             Func<Vector2, Mine> onGetMineOnPos = (Func<Vector2, Mine>)parameters[2];
             Action<Mine> onSetTargetMine = (Action<Mine>)parameters[3];
-            Action onInitializeNewVoronoi = (Action)parameters[4];
+            Func<bool> onUpdateMap = (Func<bool>)parameters[4];
 
             List <Action> behaviours = new List<Action>();
 
             behaviours.Add(() =>
             {
-                onInitializeNewVoronoi.Invoke();
+                if (onUpdateMap.Invoke())
+                {
+                    Vector2 minePos = voronoidGenerator.GetSectorCloserToPosition(actualPos);
+                    Mine closerMine = onGetMineOnPos.Invoke(minePos);
+                    onSetTargetMine.Invoke(closerMine);
 
-                Vector2 minePos = voronoidGenerator.GetSectorCloserToPosition(actualPos);
-                Mine closerMine = onGetMineOnPos.Invoke(minePos);
-                onSetTargetMine.Invoke(closerMine);
-
-                Transition((int)Flags.OnSetMine);
+                    Transition((int)Flags.OnSetMine);
+                }
+                else
+                {
+                    Transition((int)Flags.OnNoMinesFound);
+                }
             });
             behaviours.Add(() => Debug.Log("SEARCHING CLOSER MINE"));
 

@@ -8,7 +8,7 @@ namespace IA.FSM.Entity.MinerController.Constants
     {
         public const int inventoryCapacity = 15;
         public const float miningTime = 0.5f;
-        public const float moveSpeed = 4;
+        public const float moveSpeed = 1;
 
         public static Dictionary<TILE_TYPE, int> GetTileWeigths()
         {

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
+using IA.Pathfinding;
 using IA.FSM.Entity.MineController;
 using IA.FSM.Entity.MinerController.Constants;
-using IA.Pathfinding;
+using IA.FSM.Entity.MinerController;
 
-namespace IA.FSM.Entity.MinerController
+namespace IA.FSM.Entity.CarrouseController
 {
-    public class Miner : PathfinderEntity
+    public class Carrouse : PathfinderEntity
     {
         #region PRIVATE_FIELDS
         private MinerBehaviour minerBehaviour = new MinerBehaviour();

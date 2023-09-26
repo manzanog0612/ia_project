@@ -1,9 +1,9 @@
-using UnityEngine;
-
+using System;
 using System.Collections.Generic;
 
+using UnityEngine;
+
 using IA.FSM.Entity.MineController;
-using System;
 
 namespace IA.FSM.Entity.MinesController
 {
