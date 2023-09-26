@@ -6,7 +6,7 @@ namespace IA.FSM.Entity.MinerController.Constants
 {
     public class MinerConstants
     {
-        public const int inventoryCapacity = 10;
+        public const int inventoryCapacity = 15;
         public const float miningTime = 0.5f;
         public const float moveSpeed = 4;
 
@@ -30,6 +30,22 @@ namespace IA.FSM.Entity.MinerController.Constants
                 { TILE_TYPE.SAND, true },
                 { TILE_TYPE.WATER, false }
             };
+        }
+
+        public static List<TILE_TYPE> GetWalkableTiles()
+        {
+            List<TILE_TYPE> walkableTiles = new List<TILE_TYPE>();
+            Dictionary<TILE_TYPE, bool> tilesWalkableState = GetTilesWalkableState();
+
+            foreach (KeyValuePair<TILE_TYPE, bool> tileState in tilesWalkableState)
+            {
+                if (tileState.Value)
+                {
+                    walkableTiles.Add(tileState.Key);
+                }
+            }
+
+            return walkableTiles;
         }
     }
 }

@@ -24,16 +24,23 @@ namespace IA.FSM.Entity.MineController
         #region PUBLIC_METHODS
         public void Init(Vector2Int tile, Vector2 position)
         {
-            minerals = Random.Range(10, 20);
+            minerals = Random.Range(10, 12);
 
             Position = position;
             transform.position = position;
             Tile = tile;
         }
 
-        public void UpdateText()
+        public void UpdateMine()
         {
-            txtMineralsAmount.text = minerals.ToString();
+            if (Minerals == 0)
+            {
+                gameObject.SetActive(false);
+            }
+            else
+            {
+                txtMineralsAmount.text = minerals.ToString();
+            }
         }
 
         public void Extract()

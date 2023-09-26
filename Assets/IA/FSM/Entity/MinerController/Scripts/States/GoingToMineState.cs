@@ -15,7 +15,7 @@ namespace IA.FSM.Entity.MinerController.States
 
         public override List<Action> GetBehaviours(params object[] parameters)
         {
-            Action<Vector3> onSetPosition = parameters[0] as Action<Vector3>;
+            Action<Vector2> onSetPosition = parameters[0] as Action<Vector2>;
             Vector2 position = (Vector2)parameters[1];
             float speed = (float)parameters[2];
             float deltaTime = (float)parameters[3];

@@ -31,8 +31,8 @@ namespace IA.Voronoid.Entity
         {
             this.position = position;
 
-            color = Random.ColorHSV();
-            color.a = 0.2f;
+            System.Random random = new System.Random();
+            color = new Color(random.Next(0, 10) * 0.1f, random.Next(0, 10) * 0.1f, random.Next(0, 10) * 0.1f, 0.2f);
 
             segments = new List<Segment>();
             intersections = new List<Vector2>();

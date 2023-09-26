@@ -37,8 +37,13 @@ namespace IA.FSM.Entity.MinesController
         {
             for (int i = 0; i < mines.Count; i++)
             {
-                mines[i].UpdateText();
+                mines[i].UpdateMine();
             }
+        }
+
+        public Mine[] GetMinesLeft()
+        {
+            return mines.FindAll(m => m.Minerals > 0).ToArray();
         }
         #endregion
     }

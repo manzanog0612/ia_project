@@ -1,14 +1,20 @@
 using System;
+using System.Collections.Generic;
 
 using UnityEngine;
+
+using IA.Game.Entity.UrbanCenterController;
 
 using IA.FSM.Entity.MineController;
 using IA.FSM.Entity.MinerController.Constants;
 using IA.FSM.Entity.MinerController.Enums;
 using IA.FSM.Entity.MinerController.States;
-using IA.Game.Entity.UrbanCenterController;
+
 using IA.Pathfinding;
+
 using IA.Voronoid.Generator;
+
+using Grid = IA.Pathfinding.Grid;
 
 namespace IA.FSM.Entity.MinerController
 {
@@ -16,17 +22,24 @@ namespace IA.FSM.Entity.MinerController
     {
         #region PRIVATE_FIELDS
         private Mine targetMine = null;
-        private UrbanCenter home = null;
+        private UrbanCenter urbanCenter = null;
 
         private Vector2 position = Vector3.zero;
         private int inventory = 0;
-        private int foodsLeft = 3;
+        private int foodsLeft = 20;
 
         private FSM fsm;
         private Pathfinder pathfinder = null;
         private VoronoidGenerator voronoidGenerator = null;
+        private Grid grid = null;
+
+        private int[,] weights = null;
 
         private float deltaTime = 0;
+        #endregion
+
+        #region ACTIONS
+        private Func<Mine[]> onGetAllMinesLeft = null;
         #endregion
 
         #region PROPERTIES
@@ -35,15 +48,18 @@ namespace IA.FSM.Entity.MinerController
         #endregion
 
         #region PUBLIC_METHODS
-        public void Init(Pathfinder pathfinder, Vector2Int initialTile, VoronoidGenerator voronoidGenerator, UrbanCenter home, 
-            Action onLeaveMineralsInHome, Func<int,int,Tile> onGetTile, Func<Vector2, Mine> onGetMineOnPos, 
-            Func<Vector2, Tile> onGetCloserTileToPos)
+        public void Init(Pathfinder pathfinder, VoronoidGenerator voronoidGenerator, UrbanCenter urbanCenter, Grid grid,
+            Action onLeaveMineralsInHome, Func<Vector2, Mine> onGetMineOnPos, Func<Mine[]> onGetAllMinesLeft, int[,] weights)
         {
             this.pathfinder = pathfinder;
             this.voronoidGenerator = voronoidGenerator;
-            this.home = home;
+            this.urbanCenter = urbanCenter;
+            this.onGetAllMinesLeft = onGetAllMinesLeft;
+            this.grid = grid;
 
-            position = onGetTile.Invoke(initialTile.x, initialTile.y).pos;
+            this.weights = weights;
+
+            position = grid.GetTile(urbanCenter.Tile.x, urbanCenter.Tile.y).pos;
 
             fsm = new FSM(Enum.GetValues(typeof(Enums.States)).Length, Enum.GetValues(typeof(Flags)).Length);
 
@@ -51,7 +67,7 @@ namespace IA.FSM.Entity.MinerController
 
             fsm.SetRelation((int)Enums.States.GoingToMine, (int)Flags.OnReachMine, (int)Enums.States.Mining);
 
-            fsm.SetRelation((int)Enums.States.Mining, (int)Flags.OnEmptyMine, (int)Enums.States.ReturningToHome);
+            fsm.SetRelation((int)Enums.States.Mining, (int)Flags.OnEmptyMine, (int)Enums.States.SearchingCloserMine);
             fsm.SetRelation((int)Enums.States.Mining, (int)Flags.OnHungry, (int)Enums.States.WaitingForFood);
             fsm.SetRelation((int)Enums.States.Mining, (int)Flags.OnFullInventory, (int)Enums.States.ReturningToHome);
             fsm.SetRelation((int)Enums.States.Mining, (int)Flags.OnSetMine, (int)Enums.States.GoingToMine);
@@ -62,19 +78,20 @@ namespace IA.FSM.Entity.MinerController
 
             Action<Mine> onSetTargetMine = SetMine;
             Action OnMine = Mine;
-            Action<Vector3> OnSetPosition = SetPosition;
+            Action<Vector2> OnSetPosition = SetPosition;
             Action OnLeaveMineralsInHome = () =>
             {
                 onLeaveMineralsInHome.Invoke();
                 inventory = 0;
             };
+            Action onIntializeVoronoi = InitializeNewVoronoi;
 
             fsm.AddState<SearchingCloserMineState>((int)Enums.States.SearchingCloserMine,
-                () => (new object[4] { position, voronoidGenerator, onGetMineOnPos, onSetTargetMine }));
+                () => (new object[5] { position, voronoidGenerator, onGetMineOnPos, onSetTargetMine, onIntializeVoronoi }));
 
             fsm.AddState<GoingToMineState>((int)Enums.States.GoingToMine,
                () => (new object[4] { OnSetPosition, position, MinerConstants.moveSpeed, deltaTime }),
-               () => (new object[3] { onGetCloserTileToPos.Invoke(position), onGetTile.Invoke(targetMine.Tile.x, targetMine.Tile.y), pathfinder }));
+               () => (new object[3] { grid.GetCloserTileToPosition(position), grid.GetTile(targetMine.Tile.x, targetMine.Tile.y), pathfinder }));
 
             fsm.AddState<MiningState>((int)Enums.States.Mining,
                () => (new object[5] { targetMine, inventory, OnMine, deltaTime, foodsLeft }),
@@ -85,7 +102,7 @@ namespace IA.FSM.Entity.MinerController
 
             fsm.AddState<ReturningToHome>((int)Enums.States.ReturningToHome,
                () => (new object[4] { OnSetPosition, position, MinerConstants.moveSpeed, deltaTime }),
-               () => (new object[4] { onGetTile.Invoke(targetMine.Tile.x, targetMine.Tile.y), onGetTile.Invoke(home.Tile.x, home.Tile.y), pathfinder, OnLeaveMineralsInHome }));
+               () => (new object[4] { grid.GetTile(targetMine.Tile.x, targetMine.Tile.y), grid.GetTile(urbanCenter.Tile.x, urbanCenter.Tile.y), pathfinder, OnLeaveMineralsInHome }));
 
             fsm.SetCurrentStateForced((int)Enums.States.SearchingCloserMine);
         }
@@ -112,7 +129,25 @@ namespace IA.FSM.Entity.MinerController
         #endregion
 
         #region PRIVATE_METHODS
-        private void SetPosition(Vector3 pos)
+        private void InitializeNewVoronoi()
+        {
+            voronoidGenerator.Configure(GetMinesPositions(), new Vector2(grid.RealWidth, grid.RealHeight), weights);
+        }
+
+        private Vector2[] GetMinesPositions()
+        {
+            Mine[] minesLeft = onGetAllMinesLeft.Invoke();
+            List<Vector2> minesPositions = new List<Vector2>();
+
+            for (int i = 0; i < minesLeft.Length; i++)
+            {
+                minesPositions.Add(minesLeft[i].Position);
+            }
+
+            return minesPositions.ToArray();
+        }
+
+        private void SetPosition(Vector2 pos)
         {
             position = pos;
         }

@@ -12,7 +12,7 @@ using IA.Voronoid.Generator;
 using TMPro;
 
 using Grid = IA.Pathfinding.Grid;
-
+using System.Linq;
 
 namespace IA.FSM.Entity.MinerController
 {
@@ -37,8 +37,15 @@ namespace IA.FSM.Entity.MinerController
         public MinerBehaviour MinerBehaviour { get => minerBehaviour; }
         #endregion
 
+        #region UNITY_CALLS
+        private void OnDrawGizmos()
+        {
+            voronoidGenerator.Draw();
+        }
+        #endregion
+
         #region PUBLIC_METHODS
-        public void Init(UrbanCenter urbanCenter, Grid grid, Vector2Int[] minesTiles, Func<Vector2, Mine> onGetMineOnPos)
+        public void Init(UrbanCenter urbanCenter, Grid grid, Func<Vector2, Mine> onGetMineOnPos, Func<Mine[]> onGetAllMinesLeft)
         {
             this.urbanCenter = urbanCenter;
             this.grid = grid;
@@ -49,16 +56,7 @@ namespace IA.FSM.Entity.MinerController
             CalculateTilesWeights(tileWeigths);
 
             pathfinder.Init(grid, tileWeigths, tilesWalkableState);
-            minerBehaviour.Init(pathfinder, urbanCenter.Tile, voronoidGenerator, urbanCenter, OnLeaveMineralsInHome, grid.GetTile, onGetMineOnPos, grid.GetCloserTileToPosition);
-
-            List<Vector2> minesPositions = new List<Vector2>();
-
-            for (int i = 0; i < minesTiles.Length; i++)
-            {
-                minesPositions.Add(grid.GetRealPosition(minesTiles[i]));
-            }
-
-            voronoidGenerator.Configure(minesPositions.ToArray(), new Vector2(grid.RealWidth, grid.RealHeight), weights);
+            minerBehaviour.Init(pathfinder, voronoidGenerator, urbanCenter, grid, OnLeaveMineralsInHome, onGetMineOnPos, onGetAllMinesLeft, weights);
         }
 
         public void UpdateBehaviour()
@@ -67,13 +65,15 @@ namespace IA.FSM.Entity.MinerController
             minerBehaviour.SetDeltaTime(Time.deltaTime);
             txtInventory.text = minerBehaviour.Inventory.ToString();
         }
+        #endregion
 
-        private void OnDrawGizmos()
+        #region PRIVATE_METHODS
+        private void OnLeaveMineralsInHome()
         {
-            voronoidGenerator.Draw();
+            urbanCenter.PlaceMinerals(minerBehaviour.Inventory);
         }
 
-        public void CalculateTilesWeights(Dictionary<TILE_TYPE, int> tileWeigths)
+        private void CalculateTilesWeights(Dictionary<TILE_TYPE, int> tileWeigths)
         {
             weights = new int[grid.Width, grid.Height];
 
@@ -81,16 +81,9 @@ namespace IA.FSM.Entity.MinerController
             {
                 for (int y = 0; y < grid.Height; y++)
                 {
-                    weights[x,y] = tileWeigths[grid.GetTile(x, y).type];
+                    weights[x, y] = tileWeigths[grid.GetTile(x, y).type];
                 }
             }
-        }
-        #endregion
-
-        #region PRIVATE_METHODS
-        private void OnLeaveMineralsInHome()
-        {
-            urbanCenter.PlaceMinerals(minerBehaviour.Inventory);
         }
         #endregion
     }

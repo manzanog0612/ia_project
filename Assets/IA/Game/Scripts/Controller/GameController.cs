@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
 using IA.Game.Entity.UrbanCenterController;
+using IA.Pathfinding;
+using IA.FSM.Entity.MinerController.Constants;
 using IA.FSM.Entity.MinersController;
 using IA.FSM.Entity.MinesController;
 
 using Grid = IA.Pathfinding.Grid;
-using IA.Pathfinding;
-using System.Linq;
 
 namespace IA.Game.Controller
 {
@@ -40,13 +41,15 @@ namespace IA.Game.Controller
 
             urbanCenter = Instantiate(urbanCenterPrefab).GetComponent<UrbanCenter>();
 
-            Vector2Int urbanCenterTile = GetRandomTile();
+            List<TILE_TYPE> allWalkableTiles = GetWalkableTilesForAllPathfinders();
+
+            Vector2Int urbanCenterTile = GetRandomWalkableTile(allWalkableTiles);
             urbanCenter.Init(urbanCenterTile, grid.GetRealPosition(urbanCenterTile));
 
-            Vector2Int[] minesTiles = GetRandomTiles(minesAmount, urbanCenterTile);
+            Vector2Int[] minesTiles = GetRandomWalkableTiles(minesAmount, allWalkableTiles, urbanCenterTile);
 
             minesController.Init(minesTiles, grid.GetRealPosition);
-            minersController.Init(minersAmount, grid, urbanCenter, minesTiles, minesController.GetMineOnPos);
+            minersController.Init(minersAmount, grid, urbanCenter, minesController.GetMineOnPos, minesController.GetMinesLeft);
         }
 
         private void Update()
@@ -58,12 +61,21 @@ namespace IA.Game.Controller
         #endregion
 
         #region PRIVATE_METHODS
-        private Vector2Int GetRandomTile()
+        private Vector2Int GetRandomWalkableTile(List<TILE_TYPE> walkableTiles)
         {
-            return new Vector2Int(Random.Range(0, grid.Width), Random.Range(0, grid.Height));
+            Tile tile = null;
+            Vector2Int tileGridPos = Vector2Int.zero;
+            do
+            {
+                tileGridPos = new Vector2Int(Random.Range(0, grid.Width), Random.Range(0, grid.Height));
+                tile = grid.GetTile(tileGridPos.x, tileGridPos.y);
+            }
+            while (!walkableTiles.Contains(tile.type));
+
+            return tileGridPos;
         }
 
-        private Vector2Int[] GetRandomTiles(int amountRandomTiles, params Vector2Int[] exceptions)
+        private Vector2Int[] GetRandomWalkableTiles(int amountRandomTiles, List<TILE_TYPE> walkableTiles, params Vector2Int[] exceptions)
         {
             List<Vector2Int> tiles = new List<Vector2Int>();
             
@@ -75,20 +87,21 @@ namespace IA.Game.Controller
                 do
                 {
                     iterations++;
-                    tile = GetRandomTile();
+                    tile = GetRandomWalkableTile(walkableTiles);
                 }
                 while ((tiles.Contains(tile) || exceptions.ToList().Contains(tile)) && iterations < (grid.Width * grid.Height));
                 
                 tiles.Add(tile);
             }
 
-            //tiles.Add(new Vector2Int(1, 8));
-            //tiles.Add(new Vector2Int(1, 7));
-            //tiles.Add(new Vector2Int(7, 1));
-            //tiles.Add(new Vector2Int(7, 7));
-            //tiles.Add(new Vector2Int(4, 4));
-
             return tiles.ToArray();
+        }
+
+        private List<TILE_TYPE> GetWalkableTilesForAllPathfinders()
+        {
+            List<TILE_TYPE> walkableTiles = MinerConstants.GetWalkableTiles();
+
+            return walkableTiles;
         }
         #endregion
     }
