@@ -4,10 +4,14 @@ using System.Linq;
 using UnityEngine;
 
 using IA.Game.Entity.UrbanCenterController;
+
 using IA.Pathfinding;
+
 using IA.FSM.Entity.MinerController.Constants;
 using IA.FSM.Entity.MinersController;
 using IA.FSM.Entity.MinesController;
+using IA.FSM.Entity.CarrouseController;
+using IA.FSM.Entity.CarrouseController.Constants;
 
 using Grid = IA.Pathfinding.Grid;
 
@@ -21,6 +25,7 @@ namespace IA.Game.Controller
         [SerializeField] private MinesController minesController = null;
 
         [SerializeField] private GameObject urbanCenterPrefab = null;
+        [SerializeField] private GameObject carrousePrefab = null;
 
         [Header("Game Configs")]
         [SerializeField] private int minersAmount = 4;
@@ -29,6 +34,7 @@ namespace IA.Game.Controller
 
         #region PRIVATE_FIELDS
         private UrbanCenter urbanCenter = null;
+        private Carrouse carrouse = null;
         #endregion
 
         #region UNITY_CALLS
@@ -37,7 +43,7 @@ namespace IA.Game.Controller
             grid.Init();
 
             Camera.main.transform.position = new Vector3 (grid.RealWidth / 2f, grid.RealHeight / 2f, -10);
-            Camera.main.orthographicSize = grid.RealWidth;
+            Camera.main.orthographicSize = grid.RealWidth / 2f;
 
             urbanCenter = Instantiate(urbanCenterPrefab).GetComponent<UrbanCenter>();
 
@@ -50,6 +56,7 @@ namespace IA.Game.Controller
 
             minesController.Init(minesTiles, grid.GetRealPosition);
             minersController.Init(minersAmount, grid, urbanCenter, minesController.GetMineOnPos, minesController.GetMinesLeft);
+            InitCarrouse();
         }
 
         private void Update()
@@ -57,10 +64,19 @@ namespace IA.Game.Controller
             urbanCenter.UpdateText();
             minersController.UpdateBehaviours();
             minesController.UpdateMines();
+
+            carrouse.UpdateBehaviour();
         }
         #endregion
 
         #region PRIVATE_METHODS
+        private void InitCarrouse()
+        {
+            carrouse = Instantiate(carrousePrefab).GetComponent<Carrouse>();
+            carrouse.Init(urbanCenter, grid);
+            carrouse.InitBehaviour(minesController.GetMineOnPos, minersController.GetMinersMining);
+        }
+
         private Vector2Int GetRandomWalkableTile(List<TILE_TYPE> walkableTiles)
         {
             Tile tile = null;
@@ -99,7 +115,17 @@ namespace IA.Game.Controller
 
         private List<TILE_TYPE> GetWalkableTilesForAllPathfinders()
         {
-            List<TILE_TYPE> walkableTiles = MinerConstants.GetWalkableTiles();
+            List<TILE_TYPE> minerWalkableTiles = MinerConstants.GetWalkableTiles();
+            List<TILE_TYPE> carrouseWalkableTiles = CarrouseConstants.GetWalkableTiles();
+            List<TILE_TYPE> walkableTiles =  new List<TILE_TYPE>();
+
+            for (int i = 0; i < minerWalkableTiles.Count; i++)
+            {
+                if (carrouseWalkableTiles.Contains(minerWalkableTiles[i]))
+                {
+                    walkableTiles.Add(minerWalkableTiles[i]);
+                }
+            }
 
             return walkableTiles;
         }

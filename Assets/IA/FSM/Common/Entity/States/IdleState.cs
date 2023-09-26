@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace IA.FSM.Entity.MinerController.States
+namespace IA.FSM.Common.States
 {
     public class IdleState : State
     {

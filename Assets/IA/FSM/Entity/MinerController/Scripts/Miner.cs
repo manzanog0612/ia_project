@@ -5,6 +5,9 @@ using UnityEngine;
 
 using IA.FSM.Entity.MineController;
 using IA.FSM.Entity.MinerController.Constants;
+
+using IA.FSM.Common.Entity.PathfinderEntityController;
+
 using IA.Pathfinding;
 
 namespace IA.FSM.Entity.MinerController
@@ -37,7 +40,7 @@ namespace IA.FSM.Entity.MinerController
 
         protected override void UpdatePosition()
         {
-            transform.position = MinerBehaviour.Position;
+            transform.position = minerBehaviour.Position;
         }
 
         public override void UpdateBehaviour()
@@ -50,12 +53,14 @@ namespace IA.FSM.Entity.MinerController
         #region PUBLIC_METHODS
         public void InitBehaviour(Func<Vector2, Mine> onGetMineOnPos, Func<Mine[]> onGetAllMinesLeft)
         {
-            minerBehaviour.Init(pathfinder, voronoidGenerator, urbanCenter, grid, OnLeaveMineralsInHome, onGetMineOnPos, onGetAllMinesLeft, weights);
+            Action onLeaveMineralsInUrbanCenter = LeaveMineralsInUrbanCenter;
+
+            minerBehaviour.Init(pathfinder, voronoidGenerator, urbanCenter, grid,  onGetMineOnPos, weights, onLeaveMineralsInUrbanCenter, onGetAllMinesLeft);
         }
         #endregion
 
         #region PRIVATE_METHODS
-        private void OnLeaveMineralsInHome()
+        private void LeaveMineralsInUrbanCenter()
         {
             urbanCenter.PlaceMinerals(minerBehaviour.Inventory);
         }

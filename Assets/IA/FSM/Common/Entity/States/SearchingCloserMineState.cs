@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using IA.FSM.Entity.MineController;
-using IA.FSM.Entity.MinerController.Enums;
+using IA.FSM.Common.Enums;
+
 using IA.Voronoid.Generator;
 
-namespace IA.FSM.Entity.MinerController.States
+namespace IA.FSM.Common.States
 {
     public class SearchingCloserMineState : State
     {
@@ -29,11 +30,11 @@ namespace IA.FSM.Entity.MinerController.States
                     Mine closerMine = onGetMineOnPos.Invoke(minePos);
                     onSetTargetMine.Invoke(closerMine);
 
-                    Transition((int)Flags.OnSetMine);
+                    Transition((int)CommonFlags.OnSetMine);
                 }
                 else
                 {
-                    Transition((int)Flags.OnNoMinesFound);
+                    Transition((int)CommonFlags.OnNoMinesFound);
                 }
             });
             behaviours.Add(() => Debug.Log("SEARCHING CLOSER MINE"));

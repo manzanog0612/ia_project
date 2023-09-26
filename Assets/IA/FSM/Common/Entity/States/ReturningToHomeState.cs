@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using IA.FSM.Entity.MinerController.Enums;
 using IA.Pathfinding;
+using IA.FSM.Common.Enums;
 
-namespace IA.FSM.Entity.MinerController.States
+namespace IA.FSM.Common.States
 {
     public class ReturningToHome : State
     {
@@ -26,30 +26,44 @@ namespace IA.FSM.Entity.MinerController.States
 
             behaviours.Add(() =>
             {
-                Vector2 targetPos = path[indexOfMovement];
-                Vector2 newPos = position + ((targetPos - position).normalized * speed * deltaTime);
-                onSetPosition.Invoke(newPos);
-
-                if (Vector3.Distance(newPos, targetPos) < 0.01f)
+                if (path.Count == 0 || Vector3.Distance(path[path.Count - 1], position) < 0.01f)
                 {
-                    indexOfMovement++;
+                    OnReachHome();
+                    Debug.Log("AT HOME");
+                }
+                else
+                {
+                    Vector2 targetPos = path[indexOfMovement];
+                    Vector2 newPos = position + ((targetPos - position).normalized * speed * deltaTime);
+                    onSetPosition.Invoke(newPos);
 
-                    if (indexOfMovement == path.Count)
+                    if (Vector3.Distance(newPos, targetPos) < 0.01f)
                     {
-                        onReachHome.Invoke();
+                        indexOfMovement++;
 
-                        if (outOfMines)
+                        if (indexOfMovement == path.Count)
                         {
-                            Transition((int)Flags.OnFinishJob);
-                        }
-                        else
-                        {
-                            Transition((int)Flags.OnReachHome);
+                            OnReachHome();
                         }
                     }
+
+                    Debug.Log("RETURNING TO HOME");
                 }
             });
-            behaviours.Add(() => Debug.Log("RETURNING TO HOME"));
+
+            void OnReachHome()
+            {
+                onReachHome.Invoke();
+
+                if (outOfMines)
+                {
+                    Transition((int)CommonFlags.OnFinishJob);
+                }
+                else
+                {
+                    Transition((int)CommonFlags.OnReachHome);
+                }
+            }
 
             return behaviours;
         }

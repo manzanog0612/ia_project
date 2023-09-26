@@ -30,7 +30,7 @@ namespace IA.FSM.Entity.MinesController
 
         public Mine GetMineOnPos(Vector2 position)
         {
-            return mines.Find(m => m.Position == position);
+            return mines.Find(m => Vector2.Distance(m.Position, position) < 0.1f);
         }
 
         public void UpdateMines()

@@ -6,14 +6,17 @@ namespace IA.FSM.Entity.CarrouseController.Constants
 {
     public class CarrouseConstants
     {
+        public const float moveSpeed = 2;
+        public const int foodPack = 3;
+
         public static Dictionary<TILE_TYPE, int> GetTileWeigths()
         {
             return new()
             {
                 { TILE_TYPE.DIRT, 2 },
                 { TILE_TYPE.COBBLESTONE, 1 },
-                { TILE_TYPE.SAND, 8 },
-                { TILE_TYPE.WATER, 32 }
+                { TILE_TYPE.SAND, 32 },
+                { TILE_TYPE.WATER, 4 }
             };
         }
 

@@ -5,8 +5,9 @@ using UnityEngine;
 
 using IA.FSM.Entity.MinerController.Enums;
 using IA.Pathfinding;
+using IA.FSM.Common.Enums;
 
-namespace IA.FSM.Entity.MinerController.States
+namespace IA.FSM.Common.States
 {
     public class GoingToMineState : State
     {
@@ -24,19 +25,26 @@ namespace IA.FSM.Entity.MinerController.States
 
             behaviours.Add(() =>
             {
-                Vector2 targetPos = path[indexOfMovement];
-                Vector2 newPos = position + ((targetPos - position).normalized * speed * deltaTime);
-                onSetPosition.Invoke(newPos);
-
-                if (Vector2.Distance(newPos, targetPos) < 0.01f)
+                if (path.Count == 0)
                 {
-                    indexOfMovement++;
-
-                    if (indexOfMovement == path.Count)
-                    { 
-                        Transition((int)Flags.OnReachMine); 
-                    }
+                    Transition((int)CommonFlags.OnReachMine);
                 }
+                else
+                {
+                    Vector2 targetPos = path[indexOfMovement];
+                    Vector2 newPos = position + ((targetPos - position).normalized * speed * deltaTime);
+                    onSetPosition.Invoke(newPos);
+
+                    if (Vector2.Distance(newPos, targetPos) < 0.01f)
+                    {
+                        indexOfMovement++;
+
+                        if (indexOfMovement == path.Count)
+                        {
+                            Transition((int)CommonFlags.OnReachMine);
+                        }
+                    }
+                }                
             });
             behaviours.Add(() => Debug.Log("GOING TO MINE"));
 

@@ -4,27 +4,31 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using IA.Pathfinding;
+
 using IA.FSM.Entity.MineController;
-using IA.FSM.Entity.MinerController.Constants;
 using IA.FSM.Entity.MinerController;
+
+using IA.FSM.Common.Entity.PathfinderEntityController;
+
+using IA.FSM.Entity.CarrouseController.Constants;
 
 namespace IA.FSM.Entity.CarrouseController
 {
     public class Carrouse : PathfinderEntity
     {
         #region PRIVATE_FIELDS
-        private MinerBehaviour minerBehaviour = new MinerBehaviour();
+        private CarrouseBehaviour carrouseBehaviour = new CarrouseBehaviour();
         #endregion
 
-        #region PROPERTIES
-        public MinerBehaviour MinerBehaviour { get => minerBehaviour; }
+        #region PROPERTIE
+        public CarrouseBehaviour CarrouseBehaviour { get => carrouseBehaviour; }
         #endregion
 
         #region OVERRIDE
         protected override void InitializePathfinder()
         {
-            Dictionary<TILE_TYPE, int> tileWeigths = MinerConstants.GetTileWeigths();
-            Dictionary<TILE_TYPE, bool> tilesWalkableState = MinerConstants.GetTilesWalkableState();
+            Dictionary<TILE_TYPE, int> tileWeigths = CarrouseConstants.GetTileWeigths();
+            Dictionary<TILE_TYPE, bool> tilesWalkableState = CarrouseConstants.GetTilesWalkableState();
 
             CalculateTilesWeights(tileWeigths);
 
@@ -33,32 +37,26 @@ namespace IA.FSM.Entity.CarrouseController
 
         protected override void UpdateText()
         {
-            txtInventory.text = minerBehaviour.Inventory.ToString();
+            txtInventory.text = carrouseBehaviour.Inventory.ToString();
         }
 
         protected override void UpdatePosition()
         {
-            transform.position = MinerBehaviour.Position;
+            transform.position = carrouseBehaviour.Position;
         }
 
         public override void UpdateBehaviour()
         {
             base.UpdateBehaviour();
-            minerBehaviour.SetDeltaTime(Time.deltaTime);
+            carrouseBehaviour.SetDeltaTime(Time.deltaTime);
+            carrouseBehaviour.UpdateFsm();
         }
         #endregion
 
         #region PUBLIC_METHODS
-        public void InitBehaviour(Func<Vector2, Mine> onGetMineOnPos, Func<Mine[]> onGetAllMinesLeft)
+        public void InitBehaviour(Func<Vector2, Mine> onGetMineOnPos, Func<List<Miner>> onGetAllMinersMining)
         {
-            minerBehaviour.Init(pathfinder, voronoidGenerator, urbanCenter, grid, OnLeaveMineralsInHome, onGetMineOnPos, onGetAllMinesLeft, weights);
-        }
-        #endregion
-
-        #region PRIVATE_METHODS
-        private void OnLeaveMineralsInHome()
-        {
-            urbanCenter.PlaceMinerals(minerBehaviour.Inventory);
+            carrouseBehaviour.Init(pathfinder, voronoidGenerator, urbanCenter, grid, onGetMineOnPos, weights, onGetAllMinersMining);
         }
         #endregion
     }

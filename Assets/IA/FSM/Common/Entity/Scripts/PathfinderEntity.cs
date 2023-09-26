@@ -4,10 +4,13 @@ using UnityEngine;
 
 using IA.Voronoid.Generator;
 using IA.Game.Entity.UrbanCenterController;
+using IA.Pathfinding;
 
 using TMPro;
 
-namespace IA.Pathfinding
+using Grid = IA.Pathfinding.Grid;
+
+namespace IA.FSM.Common.Entity.PathfinderEntityController
 {
     public abstract class PathfinderEntity : MonoBehaviour
     {

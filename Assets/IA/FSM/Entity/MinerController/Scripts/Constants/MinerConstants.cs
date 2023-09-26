@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using IA.Pathfinding;
@@ -7,8 +8,14 @@ namespace IA.FSM.Entity.MinerController.Constants
     public class MinerConstants
     {
         public const int inventoryCapacity = 15;
+        public const int foodCapacity = 3;
         public const float miningTime = 0.5f;
-        public const float moveSpeed = 1;
+
+        public static float GetMovementSpeed()
+        {
+            Random random = new Random();
+            return 0.5f + random.Next(1, 10) * 0.1f;
+        }
 
         public static Dictionary<TILE_TYPE, int> GetTileWeigths()
         {
