@@ -13,7 +13,7 @@ namespace IA.FSM.Entity.CarrouseController.States
         public override List<Action> GetBehaviours(params object[] parameters)
         {
             Miner miner = (Miner)parameters[0];
-            Func<(int, int)> onGiveFood = (Func<(int, int)>)parameters[1];
+            Func<int> onGiveFood = (Func<int>)parameters[1];
 
             List<Action> behaviours = new List<Action>();
 
@@ -25,9 +25,9 @@ namespace IA.FSM.Entity.CarrouseController.States
                 }
                 else
                 {
-                    (int inventory, int foodToGive) = onGiveFood.Invoke();
+                    int inventory = onGiveFood.Invoke();
 
-                    miner.MinerBehaviour.ReceiveFood(foodToGive);
+                    miner.MinerBehaviour.ReceiveFood();
 
                     if (inventory <= 0)
                     {

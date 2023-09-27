@@ -8,7 +8,6 @@ namespace IA.FSM.Entity.MinerController.Constants
     public class MinerConstants
     {
         public const int inventoryCapacity = 15;
-        public const int foodCapacity = 3;
         public const float miningTime = 0.5f;
 
         public static float GetMovementSpeed()

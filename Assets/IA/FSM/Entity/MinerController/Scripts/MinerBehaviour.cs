@@ -23,7 +23,8 @@ namespace IA.FSM.Entity.MinerController
     public class MinerBehaviour : PathfinderBehaviour
     {
         #region PRIVATE_FIELDS
-        private int foodsLeft = 3;
+        private int foodsLeft = 1;
+        private int minedMineralsTillEating = 3;
         #endregion
 
         #region ACTIONS
@@ -78,9 +79,9 @@ namespace IA.FSM.Entity.MinerController
             speed = MinerConstants.GetMovementSpeed();
         }
 
-        public void ReceiveFood(int amountOfFood)
+        public void ReceiveFood()
         {
-            foodsLeft += amountOfFood;
+            foodsLeft += 1;
         }
         #endregion
 
@@ -129,7 +130,13 @@ namespace IA.FSM.Entity.MinerController
         private void Mine()
         {
             inventory++;
-            foodsLeft--;
+            minedMineralsTillEating--;
+
+            if (minedMineralsTillEating == 0)
+            {
+                minedMineralsTillEating = 3;
+                foodsLeft--; 
+            }
         }
         #endregion
     }

@@ -90,7 +90,8 @@ namespace IA.Pathfinding
             {
                 if (tile == null)
                 {
-                    return new List<Vector2>();
+                    Debug.LogError("Not posible route");
+                    return null;
                 }
 
                 path.Add(tile.pos);

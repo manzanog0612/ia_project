@@ -7,7 +7,6 @@ using IA.FSM.Common.Enums;
 using IA.FSM.Common.Entity.PathfinderEntityController;
 using IA.FSM.Entity.MineController;
 using IA.FSM.Entity.MinerController;
-using IA.FSM.Entity.MinerController.Constants;
 using IA.FSM.Entity.CarrouseController.Enums;
 using IA.FSM.Entity.CarrouseController.Constants;
 using IA.FSM.Entity.CarrouseController.States;
@@ -44,7 +43,7 @@ namespace IA.FSM.Entity.CarrouseController
             fsm.SetRelation((int)CommonStates.ReturningToHome, (int)CommonFlags.OnFinishJob, (int)CommonStates.SearchingMine);
             fsm.SetRelation((int)CommonStates.ReturningToHome, (int)CommonFlags.OnInterruptToGoToMine, (int)CommonStates.SearchingMine);
 
-            Func<(int, int)> onGiveFood = GiveFood;
+            Func<int> onGiveFood = GiveFood;
                       
             fsm.AddState<GivingFoodState>((int)Enums.States.GivingFood, 
                 () => (new object[2] { GetMinerOnMine(), onGiveFood }));
@@ -83,7 +82,7 @@ namespace IA.FSM.Entity.CarrouseController
 
             for (int i = 0; i < minersLeft.Count; i++)
             {
-                if (minersLeft[i].MinerBehaviour.FoodsLeft < MinerConstants.foodCapacity)
+                if (minersLeft[i].MinerBehaviour.FoodsLeft == 0)
                 {
                     minersPositions.Add(minersLeft[i].PathfinderBehaviour.TargetMine.Position);
                 }
@@ -101,7 +100,7 @@ namespace IA.FSM.Entity.CarrouseController
             for (int i = 0; i < miners.Count; i++)
             {
                 if (miners[i].PathfinderBehaviour.TargetMine == targetMine && 
-                    miners[i].MinerBehaviour.FoodsLeft < MinerConstants.foodCapacity)
+                    miners[i].MinerBehaviour.FoodsLeft == 0)
                 {
                     return miners[i];
                 }
@@ -110,18 +109,10 @@ namespace IA.FSM.Entity.CarrouseController
             return null;
         }
 
-        private (int, int) GiveFood()
+        private int GiveFood()
         {
-            int foodToGive = CarrouseConstants.foodPack;
-
-            if (inventory < CarrouseConstants.foodPack)
-            {
-                foodToGive = inventory;
-            }
-
-            inventory -= foodToGive;
-
-            return (inventory, foodToGive);
+            inventory -= 1;
+            return inventory;
         }
         #endregion
     }

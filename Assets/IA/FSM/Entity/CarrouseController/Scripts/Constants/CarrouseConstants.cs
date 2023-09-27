@@ -7,8 +7,6 @@ namespace IA.FSM.Entity.CarrouseController.Constants
 {
     public class CarrouseConstants
     {
-        public const int foodPack = 3;
-
         public static float GetMovementSpeed()
         {
             Random random = new Random();
