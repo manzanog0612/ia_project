@@ -5,6 +5,7 @@ using UnityEngine;
 
 using IA.FSM.Entity.MinerController.Enums;
 using IA.FSM.Entity.MineController;
+using IA.FSM.Common.Enums;
 
 namespace IA.FSM.Entity.MinerController.States
 {
@@ -22,11 +23,17 @@ namespace IA.FSM.Entity.MinerController.States
             Action onMine = parameters[2] as Action;
             float deltaTime = (float)parameters[3];
             int foodLeft = (int)parameters[4];
+            bool panic = (bool)parameters[5];
 
             List<Action> behaviours = new List<Action>();
 
             behaviours.Add(() =>
             {
+                if (panic)
+                {
+                    Transition((int)CommonFlags.OnPanic);
+                }
+                else
                 if (targetMine.Minerals == 0)
                 {
                     Transition((int)Flags.OnEmptyMine);

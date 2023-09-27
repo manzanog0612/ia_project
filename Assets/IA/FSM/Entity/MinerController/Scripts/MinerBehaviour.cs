@@ -24,8 +24,6 @@ namespace IA.FSM.Entity.MinerController
     {
         #region PRIVATE_FIELDS
         private int foodsLeft = 3;
-
-        private float speed = 0;
         #endregion
 
         #region ACTIONS
@@ -53,9 +51,11 @@ namespace IA.FSM.Entity.MinerController
             fsm.SetRelation((int)Enums.States.Mining, (int)Flags.OnHungry, (int)Enums.States.WaitingForFood);
             fsm.SetRelation((int)Enums.States.Mining, (int)Flags.OnFullInventory, (int)CommonStates.ReturningToHome);
             fsm.SetRelation((int)Enums.States.Mining, (int)CommonFlags.OnSetMine, (int)CommonStates.GoingToMine);
+            fsm.SetRelation((int)Enums.States.Mining, (int)CommonFlags.OnPanic, (int)CommonStates.ReturningToHome);
 
             fsm.SetRelation((int)Enums.States.WaitingForFood, (int)Flags.OnReceivedFood, (int)Enums.States.Mining);
             fsm.SetRelation((int)Enums.States.WaitingForFood, (int)Flags.OnEmptyMine, (int)CommonStates.SearchingMine);
+            fsm.SetRelation((int)Enums.States.WaitingForFood, (int)CommonFlags.OnPanic, (int)CommonStates.ReturningToHome);
 
             fsm.SetRelation((int)CommonStates.ReturningToHome, (int)CommonFlags.OnFinishJob, (int)CommonStates.Idle);
 
@@ -67,11 +67,11 @@ namespace IA.FSM.Entity.MinerController
             };
 
             fsm.AddState<MiningState>((int)Enums.States.Mining,
-               () => (new object[5] { targetMine, inventory, OnMine, deltaTime, foodsLeft }),
+               () => (new object[6] { targetMine, inventory, OnMine, deltaTime, foodsLeft, panic }),
                () => (new object[2] { MinerConstants.miningTime, MinerConstants.inventoryCapacity }));
 
             fsm.AddState<HungryState>((int)Enums.States.WaitingForFood,
-               () => (new object[1] { foodsLeft }));
+               () => (new object[3] { foodsLeft, targetMine, panic }));
 
             speed = MinerConstants.GetMovementSpeed();
         }
@@ -93,9 +93,9 @@ namespace IA.FSM.Entity.MinerController
             return Enum.GetValues(typeof(Flags)).Length + Enum.GetValues(typeof(CommonFlags)).Length;
         }
 
-        protected override float GetSpeed()
+        protected override bool OnInterruptToGoToMineCheck()
         {
-            return speed;
+            return !panic && (CommonStates)fsm.currentStateIndex == CommonStates.GoingToMine && targetMine.Minerals == 0;
         }
 
         protected override void OnReachHome()

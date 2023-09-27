@@ -107,9 +107,9 @@ namespace IA.Pathfinding
             Tile closerTile = null;
             float closerDist = float.MaxValue;
 
-            for (int x = 1; x < width - 2; x++)
+            for (int x = 1; x < width - 1; x++)
             {
-                for (int y = 1; y < height - 2; y++)
+                for (int y = 1; y < height - 1; y++)
                 {
                     float dist = Vector2.Distance(grid[x, y].pos, position);
                     

@@ -13,6 +13,7 @@ namespace IA.FSM.Common.States
         private List<Vector2> path = null;
         private int indexOfMovement = 0;
         Action onReachHome = null;
+        bool panicBefore = false;
 
         public override List<Action> GetBehaviours(params object[] parameters)
         {
@@ -21,11 +22,23 @@ namespace IA.FSM.Common.States
             float speed = (float)parameters[2];
             float deltaTime = (float)parameters[3];
             bool outOfMines = (bool)parameters[4];
+            Func<bool> onInterruptToGoToMineCheck = (Func<bool>)parameters[5];
+            bool panic = (bool)parameters[6];
 
-            List<Action> behaviours = new List<Action>();
+            List <Action> behaviours = new List<Action>();
 
             behaviours.Add(() =>
             {
+                if (panicBefore && !panic)
+                {
+                    Transition((int)CommonFlags.OnResumeAfterPanic);
+                }
+                else
+                if (onInterruptToGoToMineCheck.Invoke())
+                {
+                    Transition((int)CommonFlags.OnInterruptToGoToMine);
+                }
+                else
                 if (path.Count == 0 || Vector3.Distance(path[path.Count - 1], position) < 0.01f)
                 {
                     OnReachHome();
@@ -39,6 +52,7 @@ namespace IA.FSM.Common.States
 
                     if (Vector3.Distance(newPos, targetPos) < 0.01f)
                     {
+                        onSetPosition.Invoke(targetPos);
                         indexOfMovement++;
 
                         if (indexOfMovement == path.Count)
@@ -49,6 +63,8 @@ namespace IA.FSM.Common.States
 
                     Debug.Log("RETURNING TO HOME");
                 }
+
+                panicBefore = panic;
             });
 
             void OnReachHome()

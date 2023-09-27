@@ -7,6 +7,7 @@ using IA.FSM.Common.Enums;
 using IA.FSM.Common.Entity.PathfinderEntityController;
 using IA.FSM.Entity.MineController;
 using IA.FSM.Entity.MinerController;
+using IA.FSM.Entity.MinerController.Constants;
 using IA.FSM.Entity.CarrouseController.Enums;
 using IA.FSM.Entity.CarrouseController.Constants;
 using IA.FSM.Entity.CarrouseController.States;
@@ -18,7 +19,6 @@ using IA.Pathfinding;
 using IA.Voronoid.Generator;
 
 using Grid = IA.Pathfinding.Grid;
-using IA.FSM.Entity.MinerController.Constants;
 
 namespace IA.FSM.Entity.CarrouseController
 {
@@ -37,16 +37,19 @@ namespace IA.FSM.Entity.CarrouseController
             onGetAllMinersMining = (Func<List<Miner>>)parameters[0];
 
             fsm.SetRelation((int)CommonStates.GoingToMine, (int)CommonFlags.OnReachMine, (int)Enums.States.GivingFood);
-                                 
+
             fsm.SetRelation((int)Enums.States.GivingFood, (int)Flags.OnFindNextMine, (int)CommonStates.SearchingMine);
             fsm.SetRelation((int)Enums.States.GivingFood, (int)Flags.OnEmptyInventory, (int)CommonStates.ReturningToHome);
 
             fsm.SetRelation((int)CommonStates.ReturningToHome, (int)CommonFlags.OnFinishJob, (int)CommonStates.SearchingMine);
+            fsm.SetRelation((int)CommonStates.ReturningToHome, (int)CommonFlags.OnInterruptToGoToMine, (int)CommonStates.SearchingMine);
 
             Func<(int, int)> onGiveFood = GiveFood;
                       
             fsm.AddState<GivingFoodState>((int)Enums.States.GivingFood, 
                 () => (new object[2] { GetMinerOnMine(), onGiveFood }));
+
+            speed = CarrouseConstants.GetMovementSpeed();
         }
         #endregion
 
@@ -61,9 +64,11 @@ namespace IA.FSM.Entity.CarrouseController
             return Enum.GetValues(typeof(Flags)).Length + Enum.GetValues(typeof(CommonFlags)).Length;
         }
 
-        protected override float GetSpeed()
+        protected override bool OnInterruptToGoToMineCheck()
         {
-            return CarrouseConstants.moveSpeed;
+            return !panic &&
+                   ((CommonStates)fsm.currentStateIndex == CommonStates.ReturningToHome && inventory > 0 && GetPositionsOfInterest().Length > 0) ||
+                   ((CommonStates)fsm.currentStateIndex == CommonStates.GoingToMine && targetMine.Minerals == 0);
         }
 
         protected override void OnReachHome()
@@ -80,7 +85,7 @@ namespace IA.FSM.Entity.CarrouseController
             {
                 if (minersLeft[i].MinerBehaviour.FoodsLeft < MinerConstants.foodCapacity)
                 {
-                    minersPositions.Add(minersLeft[i].MinerBehaviour.Position);
+                    minersPositions.Add(minersLeft[i].PathfinderBehaviour.Position);
                 }
             }
 
@@ -95,7 +100,8 @@ namespace IA.FSM.Entity.CarrouseController
 
             for (int i = 0; i < miners.Count; i++)
             {
-                if (miners[i].MinerBehaviour.TargetMine == targetMine && miners[i].MinerBehaviour.FoodsLeft < MinerConstants.foodCapacity)
+                if (miners[i].PathfinderBehaviour.TargetMine == targetMine && 
+                    miners[i].MinerBehaviour.FoodsLeft < MinerConstants.foodCapacity)
                 {
                     return miners[i];
                 }
@@ -107,12 +113,15 @@ namespace IA.FSM.Entity.CarrouseController
         private (int, int) GiveFood()
         {
             int foodToGive = CarrouseConstants.foodPack;
+
             if (inventory < CarrouseConstants.foodPack)
             {
                 foodToGive = inventory;
             }
 
             inventory -= foodToGive;
+
+            Debug.Log(Position.ToString());
 
             return (inventory, foodToGive);
         }

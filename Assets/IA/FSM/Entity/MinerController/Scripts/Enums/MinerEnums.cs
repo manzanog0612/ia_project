@@ -8,7 +8,7 @@ namespace IA.FSM.Entity.MinerController.Enums
 
     public enum Flags
     {
-        OnHungry = 5,
+        OnHungry = 8,
         OnReceivedFood,
         OnFullInventory,
         OnEmptyMine,

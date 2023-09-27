@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using IA.FSM.Entity.MinerController.Enums;
 using IA.Pathfinding;
 using IA.FSM.Common.Enums;
 
@@ -20,12 +19,22 @@ namespace IA.FSM.Common.States
             Vector2 position = (Vector2)parameters[1];
             float speed = (float)parameters[2];
             float deltaTime = (float)parameters[3];
+            Func<bool> onInterruptToGoToMineCheck = (Func<bool>)parameters[4];
+            bool panic = (bool)parameters[5];   
 
             List<Action> behaviours = new List<Action>();
 
             behaviours.Add(() =>
             {
-                if (path.Count == 0)
+                if (panic)
+                {
+                    Transition((int)CommonFlags.OnPanic);
+                }
+                else if (onInterruptToGoToMineCheck.Invoke())
+                {
+                    Transition((int)CommonFlags.OnInterruptToGoToMine);
+                }
+                else if (path.Count == 0)
                 {
                     Transition((int)CommonFlags.OnReachMine);
                 }
@@ -37,6 +46,8 @@ namespace IA.FSM.Common.States
 
                     if (Vector2.Distance(newPos, targetPos) < 0.01f)
                     {
+                        onSetPosition.Invoke(targetPos);
+
                         indexOfMovement++;
 
                         if (indexOfMovement == path.Count)

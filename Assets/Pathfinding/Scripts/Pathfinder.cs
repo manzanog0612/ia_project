@@ -88,6 +88,11 @@ namespace IA.Pathfinding
 
             while (tile != startTile)
             {
+                if (tile == null)
+                {
+                    return new List<Vector2>();
+                }
+
                 path.Add(tile.pos);
                 tile = tileCosts[(tile.x, tile.y)].fromTile;                
             }

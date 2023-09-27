@@ -1,19 +1,25 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.UI;
 
 using IA.Game.Entity.UrbanCenterController;
 
 using IA.Pathfinding;
 
+using IA.FSM.Entity.MineController;
+using IA.FSM.Entity.MinesController;
+using IA.FSM.Entity.MinerController;
 using IA.FSM.Entity.MinerController.Constants;
 using IA.FSM.Entity.MinersController;
-using IA.FSM.Entity.MinesController;
-using IA.FSM.Entity.CarrouseController;
 using IA.FSM.Entity.CarrouseController.Constants;
+using IA.FSM.Entity.CarrousesController;
 
 using Grid = IA.Pathfinding.Grid;
+
+using TMPro;
 
 namespace IA.Game.Controller
 {
@@ -23,18 +29,21 @@ namespace IA.Game.Controller
         [SerializeField] private Grid grid = null;
         [SerializeField] private MinersController minersController = null;
         [SerializeField] private MinesController minesController = null;
+        [SerializeField] private CarrousesController carrousesController = null;
+        [SerializeField] private Button btnPanicMode = null;
 
         [SerializeField] private GameObject urbanCenterPrefab = null;
-        [SerializeField] private GameObject carrousePrefab = null;
 
         [Header("Game Configs")]
         [SerializeField] private int minersAmount = 4;
+        [SerializeField] private int carrousesAmount = 4;
         [SerializeField] private int minesAmount = 6;
         #endregion
 
         #region PRIVATE_FIELDS
         private UrbanCenter urbanCenter = null;
-        private Carrouse carrouse = null;
+
+        private bool panic = false;
         #endregion
 
         #region UNITY_CALLS
@@ -55,26 +64,53 @@ namespace IA.Game.Controller
             Vector2Int[] minesTiles = GetRandomWalkableTiles(minesAmount, allWalkableTiles, urbanCenterTile);
 
             minesController.Init(minesTiles, grid.GetRealPosition);
-            minersController.Init(minersAmount, grid, urbanCenter, minesController.GetMineOnPos, minesController.GetMinesLeft);
+            InitMiners();
             InitCarrouse();
+
+            btnPanicMode.onClick.AddListener(() => SetPanic(!panic));
         }
 
         private void Update()
         {
             urbanCenter.UpdateText();
-            minersController.UpdateBehaviours();
             minesController.UpdateMines();
-
-            carrouse.UpdateBehaviour();
+            minersController.UpdateBehaviours();
+            carrousesController.UpdateBehaviours();
         }
         #endregion
 
         #region PRIVATE_METHODS
         private void InitCarrouse()
         {
-            carrouse = Instantiate(carrousePrefab).GetComponent<Carrouse>();
-            carrouse.Init(urbanCenter, grid);
-            carrouse.InitBehaviour(minesController.GetMineOnPos, minersController.GetMinersMining);
+            Func<Vector2, Mine> onGetMineOnPos = minesController.GetMineOnPos;
+            Func<List<Miner>> onGetMinersMining = minersController.GetMinersMining;
+
+            carrousesController.Init(carrousesAmount, grid, urbanCenter, onGetMineOnPos, onGetMinersMining);
+        }
+
+        private void InitMiners()
+        {
+            Func<Vector2, Mine> onGetMineOnPos = minesController.GetMineOnPos;
+            Func<Mine[]> onGetMinesLeft = minesController.GetMinesLeft;
+
+            minersController.Init(minersAmount, grid, urbanCenter, onGetMineOnPos, onGetMinesLeft);
+        }
+
+        private void SetPanic(bool status)
+        {
+            panic = status;
+
+            if (status)
+            {
+                btnPanicMode.GetComponentInChildren<TextMeshProUGUI>().text = "Resume activities";
+            }
+            else
+            {
+                btnPanicMode.GetComponentInChildren<TextMeshProUGUI>().text = "Panic at the grid";
+            }
+
+            minersController.SetPanic(status);
+            carrousesController.SetPanic(status);
         }
 
         private Vector2Int GetRandomWalkableTile(List<TILE_TYPE> walkableTiles)
@@ -83,7 +119,7 @@ namespace IA.Game.Controller
             Vector2Int tileGridPos = Vector2Int.zero;
             do
             {
-                tileGridPos = new Vector2Int(Random.Range(0, grid.Width), Random.Range(0, grid.Height));
+                tileGridPos = new Vector2Int(UnityEngine.Random.Range(0, grid.Width), UnityEngine.Random.Range(0, grid.Height));
                 tile = grid.GetTile(tileGridPos.x, tileGridPos.y);
             }
             while (!walkableTiles.Contains(tile.type));

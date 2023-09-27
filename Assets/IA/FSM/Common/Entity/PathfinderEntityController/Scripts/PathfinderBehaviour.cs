@@ -34,6 +34,9 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
 
         protected int inventory = 0;
         protected float deltaTime = 0;
+        protected float speed = 0;
+
+        protected bool panic = false;
         #endregion
 
         #region PROPERTIES
@@ -57,22 +60,27 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
             fsm.SetRelation((int)CommonStates.SearchingMine, (int)CommonFlags.OnSetMine, (int)CommonStates.GoingToMine);
             fsm.SetRelation((int)CommonStates.SearchingMine, (int)CommonFlags.OnNoMinesFound, (int)CommonStates.ReturningToHome);
 
+            fsm.SetRelation((int)CommonStates.GoingToMine, (int)CommonFlags.OnInterruptToGoToMine, (int)CommonStates.SearchingMine);
+            fsm.SetRelation((int)CommonStates.GoingToMine, (int)CommonFlags.OnPanic, (int)CommonStates.ReturningToHome);
+
             fsm.SetRelation((int)CommonStates.ReturningToHome, (int)CommonFlags.OnReachHome, (int)CommonStates.SearchingMine);
-            
+            fsm.SetRelation((int)CommonStates.ReturningToHome, (int)CommonFlags.OnResumeAfterPanic, (int)CommonStates.SearchingMine);
+
             Action<Mine> onSetTargetMine = SetMine;
-            Action<Vector2> OnSetPosition = SetPosition;
+            Action<Vector2> onSetPosition = SetPosition;
             Func<bool> onUpdateMap = UpdateMap;
+            Func<bool> onInterruptToGoToMineCheck = OnInterruptToGoToMineCheck;
             Action onReachHome = OnReachHome;
 
             fsm.AddState<SearchingCloserMineState>((int)CommonStates.SearchingMine,
                () => (new object[5] { position, voronoidGenerator, onGetMineOnPos, onSetTargetMine, onUpdateMap }));
 
             fsm.AddState<GoingToMineState>((int)CommonStates.GoingToMine,
-               () => (new object[4] { OnSetPosition, position, GetSpeed(), deltaTime }),
+               () => (new object[6] { onSetPosition, position, speed, deltaTime, onInterruptToGoToMineCheck, panic }),
                () => (new object[3] { grid.GetCloserTileToPosition(position), grid.GetTile(targetMine.Tile.x, targetMine.Tile.y), pathfinder }));
 
             fsm.AddState<ReturningToHome>((int)CommonStates.ReturningToHome,
-               () => (new object[5] { OnSetPosition, position, GetSpeed(), deltaTime, outOfMines }),
+               () => (new object[7] { onSetPosition, position, speed, deltaTime, outOfMines, onInterruptToGoToMineCheck, panic }),
                () => (new object[4] { grid.GetCloserTileToPosition(position), grid.GetTile(urbanCenter.Tile.x, urbanCenter.Tile.y), pathfinder, onReachHome }));
 
             fsm.AddState<IdleState>((int)CommonStates.Idle, () => (new object[1] { 0 }));
@@ -93,6 +101,11 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
         public void SetMine(Mine targetMine)
         {
             this.targetMine = targetMine;
+        }
+
+        public void SetPanic(bool status)
+        {
+            panic = status;
         }
         #endregion
 
@@ -115,12 +128,16 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
             voronoidGenerator.Configure(minersPositions, new Vector2(grid.RealWidth, grid.RealHeight), weights);
             return true;
         }
+
+        protected virtual bool OnInterruptToGoToMineCheck()
+        {
+            return false;
+        }
         #endregion
 
         #region ABSTRACT_METHODS
         protected abstract int GetAmountOfStates();
         protected abstract int GetAmountOfFlags();
-        protected abstract float GetSpeed();
         protected abstract void OnReachHome();
         protected abstract Vector2[] GetPositionsOfInterest();
         #endregion

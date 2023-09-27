@@ -16,14 +16,6 @@ namespace IA.FSM.Entity.CarrouseController
 {
     public class Carrouse : PathfinderEntity
     {
-        #region PRIVATE_FIELDS
-        private CarrouseBehaviour carrouseBehaviour = new CarrouseBehaviour();
-        #endregion
-
-        #region PROPERTIE
-        public CarrouseBehaviour CarrouseBehaviour { get => carrouseBehaviour; }
-        #endregion
-
         #region OVERRIDE
         protected override void InitializePathfinder()
         {
@@ -32,31 +24,15 @@ namespace IA.FSM.Entity.CarrouseController
 
             CalculateTilesWeights(tileWeigths);
 
+            pathfinderBehaviour = new CarrouseBehaviour();
             pathfinder.Init(grid, tileWeigths, tilesWalkableState);
-        }
-
-        protected override void UpdateText()
-        {
-            txtInventory.text = carrouseBehaviour.Inventory.ToString();
-        }
-
-        protected override void UpdatePosition()
-        {
-            transform.position = carrouseBehaviour.Position;
-        }
-
-        public override void UpdateBehaviour()
-        {
-            base.UpdateBehaviour();
-            carrouseBehaviour.SetDeltaTime(Time.deltaTime);
-            carrouseBehaviour.UpdateFsm();
         }
         #endregion
 
         #region PUBLIC_METHODS
         public void InitBehaviour(Func<Vector2, Mine> onGetMineOnPos, Func<List<Miner>> onGetAllMinersMining)
         {
-            carrouseBehaviour.Init(pathfinder, voronoidGenerator, urbanCenter, grid, onGetMineOnPos, weights, onGetAllMinersMining);
+            pathfinderBehaviour.Init(pathfinder, voronoidGenerator, urbanCenter, grid, onGetMineOnPos, weights, onGetAllMinersMining);
         }
         #endregion
     }

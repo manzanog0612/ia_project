@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using IA.Pathfinding;
@@ -6,8 +7,13 @@ namespace IA.FSM.Entity.CarrouseController.Constants
 {
     public class CarrouseConstants
     {
-        public const float moveSpeed = 2;
         public const int foodPack = 3;
+
+        public static float GetMovementSpeed()
+        {
+            Random random = new Random();
+            return 1.5f + random.Next(1, 5) * 0.2f;
+        }
 
         public static Dictionary<TILE_TYPE, int> GetTileWeigths()
         {

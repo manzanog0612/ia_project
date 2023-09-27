@@ -14,12 +14,8 @@ namespace IA.FSM.Entity.MinerController
 {
     public class Miner : PathfinderEntity
     {
-        #region PRIVATE_FIELDS
-        private MinerBehaviour minerBehaviour = new MinerBehaviour();
-        #endregion
-
-        #region PROPERTIES
-        public MinerBehaviour MinerBehaviour { get => minerBehaviour; }
+        #region PROPERTIE
+        public MinerBehaviour MinerBehaviour { get => pathfinderBehaviour as MinerBehaviour; }
         #endregion
 
         #region OVERRIDE
@@ -30,24 +26,10 @@ namespace IA.FSM.Entity.MinerController
 
             CalculateTilesWeights(tileWeigths);
 
+            pathfinderBehaviour = new MinerBehaviour();
             pathfinder.Init(grid, tileWeigths, tilesWalkableState);
         }
 
-        protected override void UpdateText()
-        {
-            txtInventory.text = minerBehaviour.Inventory.ToString();
-        }
-
-        protected override void UpdatePosition()
-        {
-            transform.position = minerBehaviour.Position;
-        }
-
-        public override void UpdateBehaviour()
-        {
-            base.UpdateBehaviour();
-            minerBehaviour.SetDeltaTime(Time.deltaTime);
-        }
         #endregion
 
         #region PUBLIC_METHODS
@@ -55,14 +37,14 @@ namespace IA.FSM.Entity.MinerController
         {
             Action onLeaveMineralsInUrbanCenter = LeaveMineralsInUrbanCenter;
 
-            minerBehaviour.Init(pathfinder, voronoidGenerator, urbanCenter, grid,  onGetMineOnPos, weights, onLeaveMineralsInUrbanCenter, onGetAllMinesLeft);
+            pathfinderBehaviour.Init(pathfinder, voronoidGenerator, urbanCenter, grid,  onGetMineOnPos, weights, onLeaveMineralsInUrbanCenter, onGetAllMinesLeft);
         }
         #endregion
 
         #region PRIVATE_METHODS
         private void LeaveMineralsInUrbanCenter()
         {
-            urbanCenter.PlaceMinerals(minerBehaviour.Inventory);
+            urbanCenter.PlaceMinerals(pathfinderBehaviour.Inventory);
         }
         #endregion
     }

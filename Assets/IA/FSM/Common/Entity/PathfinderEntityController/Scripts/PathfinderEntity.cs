@@ -21,12 +21,17 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
 
         #region PRIVATE_FIELDS
         protected Pathfinder pathfinder = new Pathfinder();
+        protected PathfinderBehaviour pathfinderBehaviour;
         protected VoronoidGenerator voronoidGenerator = new VoronoidGenerator();
         
         protected UrbanCenter urbanCenter = null;
         protected Grid grid = null;
         
         protected int[,] weights = null;
+        #endregion
+
+        #region PROPERTIE
+        public PathfinderBehaviour PathfinderBehaviour { get => pathfinderBehaviour; }
         #endregion
 
         #region UNITY_CALLS
@@ -52,13 +57,17 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
         {
             UpdateText();
             UpdatePosition();
+            pathfinderBehaviour.SetDeltaTime(Time.deltaTime);
+        }
+
+        public void SetPanic(bool status)
+        {
+            pathfinderBehaviour.SetPanic(status);
         }
         #endregion
 
         #region PROTECTED_METHOS
         protected abstract void InitializePathfinder();
-        protected abstract void UpdateText();
-        protected abstract void UpdatePosition();
         protected void CalculateTilesWeights(Dictionary<TILE_TYPE, int> tileWeigths)
         {
             weights = new int[grid.Width, grid.Height];
@@ -70,6 +79,18 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
                     weights[x, y] = tileWeigths[grid.GetTile(x, y).type];
                 }
             }
+        }
+        #endregion
+
+        #region PRIVATE:METHODS
+        private void UpdateText()
+        {
+            txtInventory.text = pathfinderBehaviour.Inventory.ToString();
+        }
+
+        private void UpdatePosition()
+        {
+            transform.position = pathfinderBehaviour.Position;
         }
         #endregion
     }

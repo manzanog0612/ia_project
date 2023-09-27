@@ -7,7 +7,7 @@ namespace IA.FSM.Entity.CarrouseController.Enums
 
     enum Flags
     {
-        OnEmptyInventory = 5,
+        OnEmptyInventory = 8,
         OnFindNextMine,
     }
 }
