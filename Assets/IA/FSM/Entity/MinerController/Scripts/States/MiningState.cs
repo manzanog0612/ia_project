@@ -23,15 +23,15 @@ namespace IA.FSM.Entity.MinerController.States
             Action onMine = parameters[2] as Action;
             float deltaTime = (float)parameters[3];
             int foodLeft = (int)parameters[4];
-            bool panic = (bool)parameters[5];
+            Func<bool> onInterruptToGoToHomeCheck = (Func<bool>)parameters[5];
 
             List<Action> behaviours = new List<Action>();
 
             behaviours.Add(() =>
             {
-                if (panic)
+                if (onInterruptToGoToHomeCheck.Invoke())
                 {
-                    Transition((int)CommonFlags.OnPanic);
+                    Transition((int)CommonFlags.OnInterruptToGoToHome);
                 }
                 else
                 if (targetMine.Minerals == 0)

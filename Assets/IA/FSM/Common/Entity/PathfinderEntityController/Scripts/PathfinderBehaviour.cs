@@ -61,7 +61,7 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
             fsm.SetRelation((int)CommonStates.SearchingMine, (int)CommonFlags.OnNoMinesFound, (int)CommonStates.ReturningToHome);
 
             fsm.SetRelation((int)CommonStates.GoingToMine, (int)CommonFlags.OnInterruptToGoToMine, (int)CommonStates.SearchingMine);
-            fsm.SetRelation((int)CommonStates.GoingToMine, (int)CommonFlags.OnPanic, (int)CommonStates.ReturningToHome);
+            fsm.SetRelation((int)CommonStates.GoingToMine, (int)CommonFlags.OnInterruptToGoToHome, (int)CommonStates.ReturningToHome);
 
             fsm.SetRelation((int)CommonStates.ReturningToHome, (int)CommonFlags.OnReachHome, (int)CommonStates.SearchingMine);
             fsm.SetRelation((int)CommonStates.ReturningToHome, (int)CommonFlags.OnResumeAfterPanic, (int)CommonStates.SearchingMine);
@@ -70,13 +70,14 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
             Action<Vector2> onSetPosition = SetPosition;
             Func<bool> onUpdateMap = UpdateMap;
             Func<bool> onInterruptToGoToMineCheck = OnInterruptToGoToMineCheck;
+            Func<bool> onInterruptToGoToHomeCheck = OnInterruptToGoToHomeCheck;
             Action onReachHome = OnReachHome;
 
             fsm.AddState<SearchingCloserMineState>((int)CommonStates.SearchingMine,
                () => (new object[5] { position, voronoidGenerator, onGetMineOnPos, onSetTargetMine, onUpdateMap }));
 
             fsm.AddState<GoingToMineState>((int)CommonStates.GoingToMine,
-               () => (new object[6] { onSetPosition, position, speed, deltaTime, onInterruptToGoToMineCheck, panic }),
+               () => (new object[6] { onSetPosition, position, speed, deltaTime, onInterruptToGoToMineCheck, onInterruptToGoToHomeCheck }),
                () => (new object[3] { grid.GetCloserTileToPosition(position), grid.GetTile(targetMine.Tile.x, targetMine.Tile.y), pathfinder }));
 
             fsm.AddState<ReturningToHome>((int)CommonStates.ReturningToHome,
@@ -117,21 +118,26 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
 
         protected bool UpdateMap()
         {
-            Vector2[] minersPositions = GetPositionsOfInterest();
+            Vector2[] positions = GetPositionsOfInterest();
 
-            if (minersPositions.Length == 0)
+            if (positions.Length == 0)
             {
                 outOfMines = true;
                 return false;
             }
 
-            voronoidGenerator.Configure(minersPositions, new Vector2(grid.RealWidth, grid.RealHeight), weights);
+            voronoidGenerator.Configure(positions, new Vector2(grid.RealWidth, grid.RealHeight), weights);
             return true;
         }
 
         protected virtual bool OnInterruptToGoToMineCheck()
         {
             return false;
+        }
+
+        protected virtual bool OnInterruptToGoToHomeCheck()
+        {
+            return panic;
         }
         #endregion
 

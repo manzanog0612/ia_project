@@ -14,6 +14,7 @@ namespace IA.FSM.Common.States
         private int indexOfMovement = 0;
         Action onReachHome = null;
         bool panicBefore = false;
+        Vector2 targetPos = Vector2.zero;
 
         public override List<Action> GetBehaviours(params object[] parameters)
         {
@@ -70,6 +71,7 @@ namespace IA.FSM.Common.States
             void OnReachHome()
             {
                 onReachHome.Invoke();
+                onSetPosition.Invoke(targetPos);
 
                 if (outOfMines)
                 {
@@ -91,6 +93,7 @@ namespace IA.FSM.Common.States
             Pathfinder pathfinder = parameters[2] as Pathfinder;
             onReachHome = parameters[3] as Action;
 
+            targetPos = targetTile.pos;
             path = pathfinder.FindPath(startTile, targetTile);
             indexOfMovement = 0;
 

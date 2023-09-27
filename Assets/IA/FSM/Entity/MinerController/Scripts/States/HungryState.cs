@@ -15,15 +15,15 @@ namespace IA.FSM.Entity.MinerController.States
         {
             int foodLeft = (int)parameters[0];
             Mine mine = (Mine)parameters[1];
-            bool panic = (bool)parameters[2];
+            Func<bool> onInterruptToGoToHomeCheck = (Func<bool>)parameters[2];
 
             List<Action> behaviours = new List<Action>();
 
             behaviours.Add(() =>
             {
-                if (panic)
+                if (onInterruptToGoToHomeCheck.Invoke())
                 {
-                    Transition((int)CommonFlags.OnPanic);
+                    Transition((int)CommonFlags.OnInterruptToGoToHome);
                 }
                 else
                 if (foodLeft > 0)

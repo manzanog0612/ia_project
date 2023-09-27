@@ -85,7 +85,7 @@ namespace IA.FSM.Entity.CarrouseController
             {
                 if (minersLeft[i].MinerBehaviour.FoodsLeft < MinerConstants.foodCapacity)
                 {
-                    minersPositions.Add(minersLeft[i].PathfinderBehaviour.Position);
+                    minersPositions.Add(minersLeft[i].PathfinderBehaviour.TargetMine.Position);
                 }
             }
 
@@ -120,8 +120,6 @@ namespace IA.FSM.Entity.CarrouseController
             }
 
             inventory -= foodToGive;
-
-            Debug.Log(Position.ToString());
 
             return (inventory, foodToGive);
         }

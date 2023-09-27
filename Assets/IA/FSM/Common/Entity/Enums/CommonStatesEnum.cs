@@ -12,11 +12,11 @@ namespace IA.FSM.Common.Enums
     {
         OnSetMine,
         OnReachMine,
-        OnPanic,
         OnResumeAfterPanic,
         OnNoMinesFound,
         OnReachHome,
         OnInterruptToGoToMine,
+        OnInterruptToGoToHome,
         OnFinishJob
     }
 }

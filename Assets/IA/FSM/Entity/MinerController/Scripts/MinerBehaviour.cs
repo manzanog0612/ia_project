@@ -43,19 +43,20 @@ namespace IA.FSM.Entity.MinerController
             base.Init(pathfinder, voronoidGenerator, urbanCenter, grid, onGetMineOnPos, weights, parameters);
 
             onLeaveMineralsInHome = (Action)parameters[0];
-            onGetAllMinesLeft = (Func<Mine[]>)parameters[01];
+            onGetAllMinesLeft = (Func<Mine[]>)parameters[1];
 
             fsm.SetRelation((int)CommonStates.GoingToMine, (int)CommonFlags.OnReachMine, (int)Enums.States.Mining);
+            fsm.SetRelation((int)CommonStates.GoingToMine, (int)Flags.OnFullInventory, (int)CommonStates.ReturningToHome);
 
             fsm.SetRelation((int)Enums.States.Mining, (int)Flags.OnEmptyMine, (int)CommonStates.SearchingMine);
             fsm.SetRelation((int)Enums.States.Mining, (int)Flags.OnHungry, (int)Enums.States.WaitingForFood);
             fsm.SetRelation((int)Enums.States.Mining, (int)Flags.OnFullInventory, (int)CommonStates.ReturningToHome);
             fsm.SetRelation((int)Enums.States.Mining, (int)CommonFlags.OnSetMine, (int)CommonStates.GoingToMine);
-            fsm.SetRelation((int)Enums.States.Mining, (int)CommonFlags.OnPanic, (int)CommonStates.ReturningToHome);
+            fsm.SetRelation((int)Enums.States.Mining, (int)CommonFlags.OnInterruptToGoToHome, (int)CommonStates.ReturningToHome);
 
             fsm.SetRelation((int)Enums.States.WaitingForFood, (int)Flags.OnReceivedFood, (int)Enums.States.Mining);
             fsm.SetRelation((int)Enums.States.WaitingForFood, (int)Flags.OnEmptyMine, (int)CommonStates.SearchingMine);
-            fsm.SetRelation((int)Enums.States.WaitingForFood, (int)CommonFlags.OnPanic, (int)CommonStates.ReturningToHome);
+            fsm.SetRelation((int)Enums.States.WaitingForFood, (int)CommonFlags.OnInterruptToGoToHome, (int)CommonStates.ReturningToHome);
 
             fsm.SetRelation((int)CommonStates.ReturningToHome, (int)CommonFlags.OnFinishJob, (int)CommonStates.Idle);
 
@@ -65,13 +66,14 @@ namespace IA.FSM.Entity.MinerController
                 onLeaveMineralsInHome.Invoke();
                 inventory = 0;
             };
+            Func<bool> onInterruptToGoToHomeCheck = OnInterruptToGoToHomeCheck;
 
             fsm.AddState<MiningState>((int)Enums.States.Mining,
-               () => (new object[6] { targetMine, inventory, OnMine, deltaTime, foodsLeft, panic }),
+               () => (new object[6] { targetMine, inventory, OnMine, deltaTime, foodsLeft, onInterruptToGoToHomeCheck }),
                () => (new object[2] { MinerConstants.miningTime, MinerConstants.inventoryCapacity }));
 
             fsm.AddState<HungryState>((int)Enums.States.WaitingForFood,
-               () => (new object[3] { foodsLeft, targetMine, panic }));
+               () => (new object[3] { foodsLeft, targetMine, onInterruptToGoToHomeCheck }));
 
             speed = MinerConstants.GetMovementSpeed();
         }
@@ -96,6 +98,11 @@ namespace IA.FSM.Entity.MinerController
         protected override bool OnInterruptToGoToMineCheck()
         {
             return !panic && (CommonStates)fsm.currentStateIndex == CommonStates.GoingToMine && targetMine.Minerals == 0;
+        }
+
+        protected override bool OnInterruptToGoToHomeCheck()
+        {
+            return base.OnInterruptToGoToHomeCheck() || inventory == MinerConstants.inventoryCapacity;
         }
 
         protected override void OnReachHome()

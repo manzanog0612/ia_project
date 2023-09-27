@@ -12,6 +12,7 @@ namespace IA.FSM.Common.States
     {
         private List<Vector2> path = null;
         private int indexOfMovement = 0;
+        Vector2 targetPos = Vector2.zero;
 
         public override List<Action> GetBehaviours(params object[] parameters)
         {
@@ -19,23 +20,24 @@ namespace IA.FSM.Common.States
             Vector2 position = (Vector2)parameters[1];
             float speed = (float)parameters[2];
             float deltaTime = (float)parameters[3];
-            Func<bool> onInterruptToGoToMineCheck = (Func<bool>)parameters[4];
-            bool panic = (bool)parameters[5];   
+            Func<bool> onInterruptToGoToOtherMineCheck = (Func<bool>)parameters[4];
+            Func<bool> onInterruptToGoToHomeCheck = (Func<bool>)parameters[5];
 
             List<Action> behaviours = new List<Action>();
 
             behaviours.Add(() =>
             {
-                if (panic)
+                if (onInterruptToGoToHomeCheck.Invoke())
                 {
-                    Transition((int)CommonFlags.OnPanic);
+                    Transition((int)CommonFlags.OnInterruptToGoToHome);
                 }
-                else if (onInterruptToGoToMineCheck.Invoke())
+                else if (onInterruptToGoToOtherMineCheck.Invoke())
                 {
                     Transition((int)CommonFlags.OnInterruptToGoToMine);
                 }
                 else if (path.Count == 0)
                 {
+                    onSetPosition.Invoke(targetPos);
                     Transition((int)CommonFlags.OnReachMine);
                 }
                 else
@@ -68,6 +70,7 @@ namespace IA.FSM.Common.States
             Tile targetTile = parameters[1] as Tile;
             Pathfinder pathfinder = parameters[2] as Pathfinder;
 
+            targetPos = targetTile.pos;
             path = pathfinder.FindPath(startTile, targetTile);
             indexOfMovement = 0;
 
