@@ -35,22 +35,17 @@ namespace IA.Voronoid.Entity
             mediatrix = (origin + end) / 2;
             direction = Vector2.Perpendicular(end - origin).normalized;
         }
-
-        public Segment(Vector2 origin, Vector2 end, Vector2 mediatrix, bool isLimit = false)
-        {
-            this.origin = origin;
-            this.end = end;
-            this.isLimit = isLimit;
-            this.mediatrix = mediatrix;
-
-            direction = Vector2.Perpendicular(end - origin).normalized;
-        }
         #endregion
 
         #region PUBLIC_METHODS
         public void SetMediatrixByPercentage(float percentage)
         {
             mediatrix = Vector2.Lerp(origin, end, percentage);
+        }
+
+        public void SetMediatrix(Vector2 mediatrix)
+        {
+            this.mediatrix = mediatrix;
         }
 
         public void Draw()

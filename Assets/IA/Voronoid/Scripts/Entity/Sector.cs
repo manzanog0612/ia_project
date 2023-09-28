@@ -67,14 +67,6 @@ namespace IA.Voronoid.Entity
             }
         }
 
-       //public void AddSegment(Vector2 origin, Vector2 final, Vector2 mediatrix)
-       //{
-       //    if (segments.Find(s => s.End == final) == null)
-       //    { 
-       //        segments.Add(new Segment(origin, final, mediatrix)); 
-       //    }
-       //}
-
         public Segment GetSegmentOfSector(Sector neighbourSector)
         {
             return segments.Find(s => s.End == neighbourSector.position);

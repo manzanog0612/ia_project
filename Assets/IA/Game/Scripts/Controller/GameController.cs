@@ -130,7 +130,7 @@ namespace IA.Game.Controller
         private Vector2Int[] GetRandomWalkableTiles(int amountRandomTiles, List<TILE_TYPE> walkableTiles, params Vector2Int[] exceptions)
         {
             List<Vector2Int> tiles = new List<Vector2Int>();
-            
+
             for (int i = 0; i < amountRandomTiles; i++)
             {
                 int iterations = 0;

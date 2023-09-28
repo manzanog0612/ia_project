@@ -420,3 +420,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   txtInventory: {fileID: 5320659295060594719}
+  drawVoronoi: 0

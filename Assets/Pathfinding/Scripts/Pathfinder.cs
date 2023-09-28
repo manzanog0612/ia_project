@@ -8,10 +8,10 @@ namespace IA.Pathfinding
     {
         public Tile fromTile = null;
 
-        public int gCost = 0; // distance from starting node
-        public int hCost = 0; // distance from end node
+        public int startDist = 0; // distance from starting node
+        public int endDist = 0; // distance from end node
 
-        public int fCost => gCost + hCost;
+        public int totalDist => startDist + endDist;
     }
 
     public class Pathfinder
@@ -43,13 +43,13 @@ namespace IA.Pathfinding
             List<Tile> openTiles = new List<Tile>();
             List<Tile> closedTiles = new List<Tile>();
 
-            Dictionary<(int,int), PathfinderTileData> tileCosts = GetGHCosts(startTile, targetTile);
+            Dictionary<(int,int), PathfinderTileData> tileCosts = GetStartAndEndDistances(startTile, targetTile);
 
             openTiles.Add(startTile);
 
             while (openTiles.Count > 0)
             {
-                Tile currentTile = FindOpenTileWithLowestFCost(openTiles, tileCosts);
+                Tile currentTile = FindOpenTileWithLowestTotalDist(openTiles, tileCosts);
                 openTiles.Remove(currentTile);
                 closedTiles.Add(currentTile);
 
@@ -65,14 +65,14 @@ namespace IA.Pathfinding
                         continue;
                     }
 
-                    int currentTileGCost = tileCosts[(currentTile.x, currentTile.y)].gCost;
-                    int neighbourTileGCost = tileCosts[(neighbour.x, neighbour.y)].gCost;
+                    int currentTileStartDist = tileCosts[(currentTile.x, currentTile.y)].startDist;
+                    int neighbourTileStartDist = tileCosts[(neighbour.x, neighbour.y)].startDist;
 
-                    int newMovementCostToNeighbour = currentTileGCost + Dist(currentTile, neighbour) + tilesWeights[neighbour.type];
-                    if (newMovementCostToNeighbour < neighbourTileGCost || !openTiles.Contains(neighbour))
+                    int newMovementCostToNeighbour = currentTileStartDist + Dist(currentTile, neighbour) + tilesWeights[neighbour.type];
+                    if (newMovementCostToNeighbour < neighbourTileStartDist || !openTiles.Contains(neighbour))
                     {
-                        tileCosts[(neighbour.x, neighbour.y)].gCost = newMovementCostToNeighbour;
-                        tileCosts[(neighbour.x, neighbour.y)].hCost = Dist(neighbour, targetTile);
+                        tileCosts[(neighbour.x, neighbour.y)].startDist = newMovementCostToNeighbour;
+                        tileCosts[(neighbour.x, neighbour.y)].endDist = Dist(neighbour, targetTile);
                         tileCosts[(neighbour.x, neighbour.y)].fromTile = currentTile;
 
                         if (!openTiles.Contains(neighbour))
@@ -103,7 +103,7 @@ namespace IA.Pathfinding
             return path;
         }
 
-        private Dictionary<(int, int), PathfinderTileData> GetGHCosts(Tile start, Tile objective)
+        private Dictionary<(int, int), PathfinderTileData> GetStartAndEndDistances(Tile start, Tile objective)
         {
             Dictionary<(int, int), PathfinderTileData> tileCosts = new Dictionary<(int, int), PathfinderTileData>();
 
@@ -114,8 +114,8 @@ namespace IA.Pathfinding
                     Tile tile = grid.GetTile(i, j);
 
                     PathfinderTileData pathfinderTileData = new PathfinderTileData();
-                    pathfinderTileData.gCost = Dist(start, tile);
-                    pathfinderTileData.hCost = Dist(objective, tile);
+                    pathfinderTileData.startDist = Dist(start, tile);
+                    pathfinderTileData.endDist = Dist(objective, tile);
                     tileCosts.Add((tile.x, tile.y), pathfinderTileData);
                 }
             }
@@ -128,23 +128,23 @@ namespace IA.Pathfinding
             return Mathf.Abs(t1.x - t2.x) + Mathf.Abs(t1.y - t2.y);
         }
 
-        private Tile FindOpenTileWithLowestFCost(List<Tile> openTiles, Dictionary<(int, int), PathfinderTileData> tileCosts)
+        private Tile FindOpenTileWithLowestTotalDist(List<Tile> openTiles, Dictionary<(int, int), PathfinderTileData> tileCosts)
         {
-            Tile lowestFCostTile = null;
-            int lowestFCost = int.MaxValue;
+            Tile lowestTotalDistTile = null;
+            int lowestTotalDist = int.MaxValue;
 
             for (int i = 0; i < openTiles.Count; i++)
             {
                 Tile openTile = openTiles[i];
 
-                if (tileCosts[(openTile.x, openTile.y)].fCost < lowestFCost)
+                if (tileCosts[(openTile.x, openTile.y)].totalDist < lowestTotalDist)
                 {
-                    lowestFCostTile = openTiles[i];
-                    lowestFCost = tileCosts[(lowestFCostTile.x, lowestFCostTile.y)].fCost;
+                    lowestTotalDistTile = openTiles[i];
+                    lowestTotalDist = tileCosts[(lowestTotalDistTile.x, lowestTotalDistTile.y)].totalDist;
                 }
             }
 
-            return lowestFCostTile;
+            return lowestTotalDistTile;
         }
     }
 }

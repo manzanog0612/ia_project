@@ -148,92 +148,175 @@ namespace IA.Voronoid.Generator
         
         private void SetSectorsWeights(int[,] weigths)
         {
-            const int amountOfIterations = 1;            
-            for (int iterations = 0; iterations < amountOfIterations; iterations++)
-            {
-                for (int i = 0; i < sectors.Count; i++)
-                {
-                    List<Sector> neighbours = sectors[i].Neighbours;
-                    Sector sector = sectors[i]; 
-
-                    for (int j = 0; j < 1; j++)
-                    {
-                        Sector neighbour = neighbours[j];
-
-                        int sectorWeigth = GetTotalWeightOnSector(sector, weigths);
-                        int neighbourWeigth = GetTotalWeightOnSector(neighbour, weigths);
-
-                        float sectorWeightPercentage = sectorWeigth / (float)(sectorWeigth + neighbourWeigth);
-
-                        BalanceSector(sector, neighbour, 1 - sectorWeightPercentage);
-
-                        for (int k = 0; k < neighbours.Count; k++)
-                        {
-                            BalanceSector(neighbours[k], sector, sectorWeightPercentage);
-                        }
-
-                        for (int k = 0; k < sectors.Count; k++)
-                        {
-                            sectors[k].SetSegmentLimits(limits);
-
-                            //for (int l = 0; l < sectors.Count; l++)
-                            //{
-                            //    if (k == l)
-                            //    {
-                            //        continue;
-                            //    }
-                            //
-                            //    sectors[k].AddSegment(sectors[k].Position, sectors[l].Position);
-                            //}
-
-                            sectors[k].SetIntersections(gridSize);
-                        }
-                    }
-                }
-            }
-        }
-
-        /*
-         private void SetSectorsWeights(int[,] weigths)
-        {
             const int amountOfIterations = 7;            
             for (int iterations = 0; iterations < amountOfIterations; iterations++)
             {
                 for (int i = 0; i < sectors.Count; i++)
                 {
-                    for (int j = 0; j < sectors[i].Neighbours.Count; j++)
+                    //calculate total sector weigth percentage
+                    Sector sector = sectors[i]; 
+
+                    float sectorWeigth = GetTotalWeightOnSector(sector, weigths);
+                    float totalWeight = sectorWeigth;
+
+                    List<Sector> neighbours = sectors[i].Neighbours;
+                    for (int j = 0; j < neighbours.Count; j++)
                     {
-                        Sector sector = sectors[i];
-                        Sector neighbour = sectors[i].Neighbours[j];
-
-                        int totalSectorWeigth = GetTotalWeightOnSector(sector, weigths);
-                        int totalNeighbourWeigth = GetTotalWeightOnSector(neighbour, weigths);
-
-                        float sectorWeightPercentage = totalSectorWeigth / (float)(totalSectorWeigth + totalNeighbourWeigth);
-                        float neighbourWeightPercentage = totalNeighbourWeigth / (float)(totalSectorWeigth + totalNeighbourWeigth);
-
-                        BalanceSector(sector, neighbour, 1 - sectorWeightPercentage);
-                        BalanceSector(neighbour, sector, 1 - neighbourWeightPercentage);
+                        Sector neighbour = neighbours[j];
+                        totalWeight += GetTotalWeightOnSector(neighbour, weigths);
                     }
-                }
 
-                for (int i = 0; i < sectors.Count; i++)
-                {
-                    sectors[i].SetIntersections(gridSize);
+                    float sectorWeightPercentage = sectorWeigth / (float)totalWeight;
+
+                    //balance mediatrices by percentage for all sector's mediatrices and only the modified segment for the neighbours
+                    BalanceSector(sector, 1 - sectorWeightPercentage);
+
+                    for (int j = 0; j < neighbours.Count; j++)
+                    {
+                        Sector neighbour = neighbours[j];
+                        
+                        BalanceNeighbour(neighbour, sector, sectorWeightPercentage);
+                    }
+
+                    //recalculate intersections for sector
+                    ResetSector(sector);
+                    sector.SetIntersections(gridSize);
+
+                    //once I have the new intersections generate the new mediatrices for all neighbours
+                    //first, get the intersection and the segment
+                    for (int j = 0; j < neighbours.Count; j++)
+                    {
+                        Sector neighbour = neighbours[j];
+
+                        Segment neighbourSectorSegment = neighbour.GetSegmentOfSector(sector);
+                        Segment sectorSegment = sector.GetSegmentOfSector(neighbour);
+
+                        List<Sector> commonNeighbours = sector.Neighbours.FindAll(s => neighbour.Neighbours.Contains(s));
+
+                        if (sectorSegment == null)
+                        {
+                            continue;
+                        }
+
+                        for (int k = 0; k < commonNeighbours.Count; k++)
+                        {
+                            //find old intersection
+                            Sector commonNeighbour = commonNeighbours[k];
+                            Segment commonNeighbourSectorSegmentForNeighbour = neighbour.GetSegmentOfSector(commonNeighbour);
+
+                            if (neighbourSectorSegment == null || neighbourSectorSegment.Intersections == null || commonNeighbourSectorSegmentForNeighbour == null || commonNeighbourSectorSegmentForNeighbour.Intersections == null)
+                            {
+                                continue;
+                            }
+
+                            Vector2 oldIntersection = Vector2.one * -1;
+
+                            for (int l = 0; l < neighbourSectorSegment.Intersections.Count; l++)
+                            {
+                                if (commonNeighbourSectorSegmentForNeighbour.Intersections.Contains(neighbourSectorSegment.Intersections[l]))
+                                {
+                                    oldIntersection = neighbourSectorSegment.Intersections[l];
+                                }
+                            }
+
+                            //Vector2 oldIntersection = neighbourSectorSegment.Intersections.Find(i => commonNeighbourSectorSegmentForNeighbour.Intersections.Contains(i));
+
+                            if (oldIntersection == Vector2.one * -1)
+                            {
+                                continue;
+                            }
+
+                            //find new intersection
+                            Segment commonNeighbourSectorSegmentForSector = sector.GetSegmentOfSector(commonNeighbour);
+
+                            if (commonNeighbourSectorSegmentForSector == null)
+                            {
+                                continue;
+                            }
+
+                            Vector2 newIntersection = sectorSegment.Intersections.Find(i => commonNeighbourSectorSegmentForSector.Intersections.Contains(i));
+
+                            //calculate new mediatrix for neighbour and common neighbour though finding the intersection between the common neighbour segment
+                            //and a mock segment that follows the same direction as the mediatrix placed on the new intersection point
+
+                            //mediatrix = (origin + end) / 2;
+                            //direction = Vector2.Perpendicular(end - origin).normalized;
+
+                            Segment mockSegment1 = commonNeighbourSectorSegmentForNeighbour;
+                            Segment mockSegment2 = new Segment(newIntersection - (mockSegment1.Mediatrix + mockSegment1.Direction.normalized * gridSize.magnitude),
+                                                               newIntersection + (mockSegment1.Mediatrix + mockSegment1.Direction.normalized * gridSize.magnitude));
+
+                            Vector2? newMediatrix = GetIntersection(mockSegment1, mockSegment2, gridSize);
+
+                            //set found mediatrix for sector's neighbour and common neighbour
+                            commonNeighbourSectorSegmentForNeighbour.SetMediatrix(newMediatrix.Value);
+
+                            Segment commonNeighbourSegment = commonNeighbour.GetSegmentOfSector(neighbour);
+
+                            if (commonNeighbourSegment == null)
+                            {
+                                continue;
+                            }
+
+                            commonNeighbourSegment.SetMediatrix(newMediatrix.Value);
+                        }
+                    }
+
+                    for (int j = 0; j < neighbours.Count; j++)
+                    {
+                        Sector neighbour = neighbours[j];
+                        ResetSector(neighbour);
+                        neighbour.SetIntersections(gridSize);
+                    }
                 }
             }
         }
-         */
 
-        private void BalanceSector(Sector sector, Sector neighbour, float sectorWeightPercentage)
+        private Vector2? GetIntersection(Segment seg1, Segment seg2, Vector2 gridSize)
         {
-            Segment sectorSegment = sector.GetSegmentOfSector(neighbour);
+            Vector2 intersection = Vector2.zero;
 
-            if (sectorSegment == null)
+            Vector2 p1s = seg1.Mediatrix;
+            Vector2 p1e = seg1.Mediatrix + seg1.Direction * gridSize.magnitude;
+            Vector2 p2s = seg2.Mediatrix;
+            Vector2 p2e = seg2.Mediatrix + seg2.Direction * gridSize.magnitude;
+
+            //cross product to know if segments are paralel
+            if (((p1s.x - p1e.x) * (p2s.y - p2e.y) - (p1s.y - p1e.y) * (p2s.x - p2e.x)) == 0)
             {
-                return;
+                return null;
             }
 
+            float p1CrossDiff = p1s.x * p1e.y - p1s.y * p1e.x; //cross difference
+            float p2CrossDiff = p2s.x * p2e.y - p2s.y * p2e.x;
+            float p2XLength = p2s.x - p2e.x;
+            float p2YLength = p2s.y - p2e.y;
+            float p1XLength = p1s.x - p1e.x;
+            float p1YLength = p1s.y - p1e.y;
+
+            intersection.x = (p1CrossDiff * p2XLength - p1XLength * p2CrossDiff) / (p1XLength * p2YLength - p1YLength * p2XLength);
+            intersection.y = (p1CrossDiff * p2YLength - p1YLength * p2CrossDiff) / (p1XLength * p2YLength - p1YLength * p2XLength);
+
+            return intersection;
+        }
+
+        private void ResetSector(Sector sector)
+        {
+            sector.SetSegmentLimits(limits);
+
+            for (int i = 0; i < sectors.Count; i++)
+            {
+                if (sectors[i] != sector)
+                {
+                    continue;
+                }
+
+                sector.AddSegment(sector.Position, sectors[i].Position);
+            }
+        }
+
+        private void BalanceSector(Sector sector, float sectorWeightPercentage)
+        {
             sector.SetAllSegmentsMatrices(sectorWeightPercentage);
         }
 
