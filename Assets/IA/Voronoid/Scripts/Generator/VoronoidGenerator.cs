@@ -75,7 +75,6 @@ namespace IA.Voronoid.Generator
             for (int i = 0; i < sectors.Count; i++)
             {
                 sectors[i].DrawSector();
-                sectors[i].DrawSegments();
             }
         }
         #endregion

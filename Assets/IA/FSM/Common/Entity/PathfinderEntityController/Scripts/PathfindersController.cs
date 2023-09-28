@@ -17,6 +17,7 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
         #endregion
 
         #region PRIVATE_FIELDS
+        int entitiesAmount = 0;
         protected ConcurrentBag<PathfinderEntity> pathfindersFsm = new ConcurrentBag<PathfinderEntity>();
         protected PathfinderEntity[] pathfinders = null;
         #endregion
@@ -24,6 +25,7 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
         #region PUBLIC_METHODS
         public virtual void Init(int entitiesAmount, Grid grid, UrbanCenter urbanCenter, params object[] paramenters)
         {
+            this.entitiesAmount = entitiesAmount;
             pathfinders = new PathfinderEntity[entitiesAmount];
 
             for (int i = 0; i < entitiesAmount; i++)
@@ -32,6 +34,8 @@ namespace IA.FSM.Common.Entity.PathfinderEntityController
                 pathfinders[i].Init(urbanCenter, grid);
                 pathfindersFsm.Add(pathfinders[i]);
             }
+
+            ParallelOptions options = new ParallelOptions { MaxDegreeOfParallelism = entitiesAmount };
         }
 
         public void SetPanic(bool status)

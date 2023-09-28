@@ -85,14 +85,6 @@ namespace IA.Voronoid.Entity
             }
         }
 
-        public void DrawSegments()
-        {
-            //for (int i = 0; i < segments.Count; i++)
-            //{
-            //    segments[i].Draw();
-            //}
-        }
-
         public void DrawSector()
         {
             Gizmos.color = color;
@@ -100,13 +92,6 @@ namespace IA.Voronoid.Entity
 
             Handles.color = color;
             Handles.DrawAAConvexPolygon(points);
-
-            //for (int i = 0; i < points.Length; i++)
-            //{ 
-            //    Gizmos.color = color;
-            //    Gizmos.DrawSphere(points[i], 0.5f);
-            //}
-            
 
             Handles.color = Color.black;
             Handles.DrawPolyLine(points);
